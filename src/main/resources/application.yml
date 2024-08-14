@@ -1,0 +1,25 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: BookLending
+  datasource:
+    url: jdbc:postgresql://localhost:5432/booklending
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  jackson:
+    serialization:
+      indent-output: true
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web: DEBUG
