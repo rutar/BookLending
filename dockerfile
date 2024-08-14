@@ -7,7 +7,6 @@ WORKDIR /home/gradle/project
 # Copy the Gradle wrapper and properties
 COPY gradle /home/gradle/project/gradle
 COPY gradlew /home/gradle/project/gradlew
-# COPY build.gradle.kts settings.gradle.kts /home/gradle/project/
 
 # Download dependencies (cached if no changes in build files)
 RUN ./gradlew --no-daemon build || return 0
@@ -21,6 +20,9 @@ RUN ./gradlew clean bootJar
 FROM openjdk:17-jdk-alpine
 WORKDIR /app
 COPY --from=build /home/gradle/project/build/libs/*.jar /app/app.jar
+
+# Copy Liquibase changelog files to the final image
+COPY --from=build /home/gradle/project/src/main/resources/db/changelog /app/db/changelog
 
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]

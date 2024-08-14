@@ -19,6 +19,16 @@ spring:
     serialization:
       indent-output: true
 
+liquibase:
+  change-log: classpath:db/changelog/db.changelog-master.yaml
+  contexts: development, production
+  default-schema: public
+  drop-first: false
+  enabled: true
+  liquibase-schema: public
+  liquibase-tablespace: public
+  test-rollback-on-update: false
+
 logging:
   level:
     root: INFO

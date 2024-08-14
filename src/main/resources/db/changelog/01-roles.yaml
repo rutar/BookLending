@@ -1,0 +1,27 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: dbadmin
+      changes:
+        - createTable:
+            tableName: roles
+            columns:
+              - column:
+                  name: id
+                  type: SERIAL
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: name
+                  value: 'USER'
+              - column:
+                  name: name
+                  value: 'ADMIN'

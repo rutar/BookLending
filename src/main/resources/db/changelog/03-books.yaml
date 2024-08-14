@@ -1,0 +1,41 @@
+databaseChangeLog:
+  - changeSet:
+      id: 3
+      author: dbadmin
+      changes:
+        - createTable:
+            tableName: books
+            columns:
+              - column:
+                  name: id
+                  type: SERIAL
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: title
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: author
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: isbn
+                  type: VARCHAR(13)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: available_copies
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+                  defaultValue: '0'
+              - column:
+                  name: total_copies
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+                  defaultValue: '0'
