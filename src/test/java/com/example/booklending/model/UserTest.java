@@ -1,12 +1,15 @@
 package com.example.booklending.model;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class UserTest {
 
+
     @Test
+    @Tag("unit")
     public void testUserCreation() {
         User user = new User();
         user.setUsername("testuser");

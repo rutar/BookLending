@@ -4,6 +4,7 @@ import com.example.booklending.model.User;
 import com.example.booklending.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -30,6 +31,7 @@ class UserServiceTest {
     }
 
     @Test
+    @Tag("unit")
     void createUser() {
         User user = new User();
         user.setUsername("john_doe");
@@ -43,6 +45,7 @@ class UserServiceTest {
     }
 
     @Test
+    @Tag("unit")
     void getUserById() {
         User user = new User();
         user.setId(1L);
@@ -56,6 +59,7 @@ class UserServiceTest {
     }
 
     @Test
+    @Tag("unit")
     void updateUser() {
         User user = new User();
         user.setId(1L);
@@ -70,6 +74,7 @@ class UserServiceTest {
     }
 
     @Test
+    @Tag("unit")
     void deleteUser_userExists() {
         User user = new User();
         user.setId(1L);
@@ -82,6 +87,7 @@ class UserServiceTest {
     }
 
     @Test
+    @Tag("unit")
     void deleteUser_userDoesNotExist() {
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
@@ -93,6 +99,7 @@ class UserServiceTest {
     }
 
     @Test
+    @Tag("unit")
     void getUserByUsername() {
         User user = new User();
         user.setUsername("john_doe");
@@ -106,6 +113,7 @@ class UserServiceTest {
     }
 
     @Test
+    @Tag("unit")
     void getUserByEmail() {
         User user = new User();
         user.setEmail("john.doe@example.com");
@@ -119,6 +127,7 @@ class UserServiceTest {
     }
 
     @Test
+    @Tag("unit")
     void getAllUsers() {
         User user1 = new User();
         user1.setUsername("john_doe");

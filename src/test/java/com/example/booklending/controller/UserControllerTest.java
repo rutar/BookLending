@@ -5,6 +5,7 @@ import com.example.booklending.model.User;
 import com.example.booklending.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -41,6 +42,7 @@ public class UserControllerTest {
     }
 
     @Test
+    @Tag("unit")
     public void testCreateUser() throws Exception {
         UserDto userDto = new UserDto("john_doe", "password123", "john.doe@example.com", 1);
         User savedUser = new User(1L, "john_doe", "password123", "john.doe@example.com", 1);
@@ -56,6 +58,7 @@ public class UserControllerTest {
     }
 
     @Test
+    @Tag("unit")
     public void testGetUserById() throws Exception {
         User user = new User(1L, "john_doe", "password123", "john.doe@example.com", 1);
 
@@ -70,6 +73,7 @@ public class UserControllerTest {
     }
 
     @Test
+    @Tag("unit")
     public void testGetAllUsers() throws Exception {
 
         ArrayList<User> users = new ArrayList<>();
@@ -95,6 +99,7 @@ public class UserControllerTest {
     }
 
     @Test
+    @Tag("unit")
     public void testGetUserByUsername() throws Exception {
         User user = new User(1L, "john_doe", "password123", "john.doe@example.com", 1);
 
@@ -109,6 +114,7 @@ public class UserControllerTest {
     }
 
     @Test
+    @Tag("unit")
     public void testGetUserByEmail() throws Exception {
         User user = new User(1L, "john_doe", "password123", "john.doe@example.com", 1);
 
@@ -123,6 +129,7 @@ public class UserControllerTest {
     }
 
     @Test
+    @Tag("unit")
     public void testUpdateUser() throws Exception {
         UserDto userDto = new UserDto("john_doe_updated", "password1234", "john.doe.updated@example.com", 1);
         User updatedUser = new User(null, "john_doe_updated", "password1234", "john.doe.updated@example.com", 1);
@@ -140,6 +147,7 @@ public class UserControllerTest {
     }
 
     @Test
+    @Tag("unit")
     public void testDeleteUser() throws Exception {
         when(userService.getUserById(1L)).thenReturn(Optional.of(new User()));
 

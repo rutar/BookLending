@@ -44,8 +44,9 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'org.mockito:mockito-core:4.0.0'
-    testImplementation 'org.testcontainers:testcontainers:1.18.3'
-    testImplementation 'org.testcontainers:postgresql:1.18.3'
+    testImplementation 'org.testcontainers:testcontainers:1.19.0'
+    testImplementation 'org.testcontainers:junit-jupiter:1.19.0'
+    testImplementation 'org.testcontainers:postgresql:1.19.0'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
@@ -57,11 +58,31 @@ jacocoTestReport {
     }
 }
 
-test {
-    useJUnitPlatform()
-    finalizedBy jacocoTestReport
-}
 
 bootJar {
     archiveFileName = 'book-lending.jar'
+}
+
+// Custom task to run only unit tests
+tasks.register('unitTest', Test) {
+    useJUnitPlatform {
+        includeTags 'unit'
+    }
+    finalizedBy 'jacocoTestReport'
+}
+
+// Custom task to run only integration tests
+tasks.register('integrationTest', Test) {
+    forkEvery = 0 // Disables forking for every test
+    maxParallelForks = 1 // Limits to a single fork
+    useJUnitPlatform {
+        includeTags 'integration'
+    }
+    shouldRunAfter tasks.named('unitTest')
+    finalizedBy 'jacocoTestReport'
+}
+
+// Adjust the check task dependencies
+tasks.named('check') {
+    dependsOn tasks.named('unitTest'), tasks.named('integrationTest')
 }

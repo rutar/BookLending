@@ -1,13 +1,13 @@
 package com.example.booklending.repository;
 
+import com.example.booklending.AbstractIntegrationTest;
 import com.example.booklending.model.Role;
 import com.example.booklending.model.User;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -15,28 +15,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-public class UserRepositoryTest {
-
-    private static final PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>("postgres:15.3");
+@Tag("integration")
+@Transactional
+public class UserRepositoryTest extends AbstractIntegrationTest {
 
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private RoleRepository roleRepository;
-
-    @BeforeAll
-    static void setUp() {
-        postgresContainer.start();
-        System.setProperty("spring.datasource.url", postgresContainer.getJdbcUrl());
-        System.setProperty("spring.datasource.username", postgresContainer.getUsername());
-        System.setProperty("spring.datasource.password", postgresContainer.getPassword());
-    }
-
-    @AfterAll
-    static void tearDown() {
-        postgresContainer.stop();
-    }
 
     @Test
     void testSaveAndFindUserByUsername() {
