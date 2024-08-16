@@ -1,23 +1,20 @@
 package com.example.booklending.controller;
 
 import com.example.booklending.dto.UserDto;
-import com.example.booklending.model.User;
 import com.example.booklending.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     @Autowired
     public UserController(UserService userService) {
@@ -28,18 +25,23 @@ public class UserController {
     @PostMapping
     public ResponseEntity<UserDto> createUser(@RequestBody UserDto userDto) {
         try {
-            User savedUserDto = userService.createUser(dtoToEntity(userDto));
-            return new ResponseEntity<>(entityToDto(savedUserDto), HttpStatus.CREATED);
+            Optional<UserDto> savedUserDto = userService.createUser(userDto);
+
+            return savedUserDto
+                    .map(user -> ResponseEntity
+                            .created(URI.create("/users/" + user.getId()))
+                            .body(user))
+                    .orElseGet(() -> new ResponseEntity<>(HttpStatus.BAD_REQUEST));
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     // Get a user by username
     @GetMapping("/username/{username}")
     public ResponseEntity<UserDto> getUserByUsername(@PathVariable String username) {
-        Optional<User> user = userService.getUserByUsername(username);
-        return user.map(this::entityToDto)
+        Optional<UserDto> userDto = userService.getUserByUsername(username);
+        return userDto
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
@@ -47,8 +49,8 @@ public class UserController {
     // Get a user by email
     @GetMapping("/email/{email}")
     public ResponseEntity<UserDto> getUserByEmail(@PathVariable String email) {
-        Optional<User> user = userService.getUserByEmail(email);
-        return user.map(this::entityToDto)
+        Optional<UserDto> user = userService.getUserByEmail(email);
+        return user
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
@@ -56,65 +58,41 @@ public class UserController {
     // Get all users
     @GetMapping
     public ResponseEntity<Iterable<UserDto>> getAllUsers() {
-        Iterable<User> users = userService.getAllUsers();
-        return new ResponseEntity<>(convertToDtoList(users), HttpStatus.OK);
+        Iterable<UserDto> users = userService.getAllUsers();
+        return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
-    // Get a user by Id
+    // Get a user by id
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
-        Optional<User> user = userService.getUserById(id);
-        return user.map(value -> new ResponseEntity<>(entityToDto(value), HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        Optional<UserDto> user = userService.getUserById(id);
+        return user.map(value -> new ResponseEntity<>(value, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     // Update user
     @PutMapping("/{id}")
-    public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @RequestBody UserDto userDto) {
-        Optional<User> user = userService.getUserById(id);
-        if (user.isPresent()) {
-            User updatedUser = userService.updateUser(id, dtoToEntity(userDto));
-            return new ResponseEntity<>(entityToDto(updatedUser), HttpStatus.OK);
+    public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @RequestBody UserDto userDtoNew) {
+        Optional<UserDto> userDtoCurrent = userService.getUserById(id);
+        if (userDtoCurrent.isPresent()) {
+            Optional<UserDto> UserDtoUpdated = userService.updateUser(id, userDtoNew);
+            return UserDtoUpdated.map(userDto -> new ResponseEntity<>(userDto, HttpStatus.OK))
+                    .orElseGet(() -> new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
+
     // Delete user
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        Optional<User> user = userService.getUserById(id);
-        if (user.isPresent()) {
+        Optional<UserDto> userDto = userService.getUserById(id);
+        if (userDto.isPresent()) {
             userService.deleteUser(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
-
-    private User dtoToEntity(UserDto userDto) {
-        User user = new User();
-        user.setUsername(userDto.getUsername());
-        user.setPassword(userDto.getPassword());
-        user.setEmail(userDto.getEmail());
-        user.setRoleId(userDto.getRoleId());
-        return user;
-    }
-
-    private UserDto entityToDto(User user) {
-        UserDto userDto = new UserDto();
-        userDto.setUsername(user.getUsername());
-        userDto.setPassword(user.getPassword());
-        userDto.setEmail(user.getEmail());
-        userDto.setRoleId(user.getRoleId());
-        return userDto;
-    }
-
-    // Convert a list of User entities to UserDto objects
-    private Iterable<UserDto> convertToDtoList(Iterable<User> users) {
-        return StreamSupport.stream(users.spliterator(), false)
-                .map(this::entityToDto)
-                .collect(Collectors.toList());
-    }
-
 
 }

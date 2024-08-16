@@ -5,11 +5,11 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("unit")
 class UserTest {
 
 
     @Test
-    @Tag("unit")
     public void testUserCreation() {
         User user = new User();
         user.setUsername("testuser");
