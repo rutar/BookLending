@@ -64,7 +64,7 @@ class UserServiceTest {
 
         Optional<UserDto> result = userService.createUser(userDto);
 
-        assertEquals( Optional.of(userDto), result);
+        assertEquals(Optional.of(userDto), result);
         verify(userRepository).save(user);
     }
 
@@ -118,7 +118,7 @@ class UserServiceTest {
     @Test
     void getUserByUsername_shouldReturnUserDtoWhenUserExists() {
         when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
-        when(modelMapper.map(Optional.of(user), UserDto.class)).thenReturn(userDto);
+        when(modelMapper.map(user, UserDto.class)).thenReturn(userDto);
 
         Optional<UserDto> result = userService.getUserByUsername("testuser");
 
@@ -129,7 +129,7 @@ class UserServiceTest {
     @Test
     void getUserByEmail_shouldReturnUserDtoWhenUserExists() {
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
-        when(modelMapper.map(Optional.of(user), UserDto.class)).thenReturn(userDto);
+        when(modelMapper.map(user, UserDto.class)).thenReturn(userDto);
 
         Optional<UserDto> result = userService.getUserByEmail("test@example.com");
 

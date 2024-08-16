@@ -1,7 +1,16 @@
 package com.example.booklending.controller;
 
 import com.example.booklending.dto.UserDto;
+import com.example.booklending.exceptions.ConflictException;
+import com.example.booklending.exceptions.UserAlreadyExistsException;
 import com.example.booklending.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +21,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/users")
+@Tag(name = "Users", description = "Endpoints for managing users")
 public class UserController {
 
     private final UserService userService;
@@ -21,57 +31,93 @@ public class UserController {
         this.userService = userService;
     }
 
-    // Create a new user
+    @Operation(summary = "Create a new user", description = "Creates a new user with the provided details.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "User created successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @PostMapping
-    public ResponseEntity<UserDto> createUser(@RequestBody UserDto userDto) {
+    public ResponseEntity<?> createUser(@RequestBody UserDto userDto) {
+
         try {
             Optional<UserDto> savedUserDto = userService.createUser(userDto);
 
             return savedUserDto
                     .map(user -> ResponseEntity
-                            .created(URI.create("/users/" + user.getId()))
+                            .created(URI.create("/api/users/" + user.getId()))
                             .body(user))
                     .orElseGet(() -> new ResponseEntity<>(HttpStatus.BAD_REQUEST));
+        } catch (UserAlreadyExistsException | ConflictException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    // Get a user by username
+    @Operation(summary = "Get user by username", description = "Fetches a user based on the provided username.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
     @GetMapping("/username/{username}")
-    public ResponseEntity<UserDto> getUserByUsername(@PathVariable String username) {
+    public ResponseEntity<UserDto> getUserByUsername(@Parameter(description = "Username of the user to fetch") @PathVariable String username) {
         Optional<UserDto> userDto = userService.getUserByUsername(username);
         return userDto
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    // Get a user by email
+    @Operation(summary = "Get user by email", description = "Fetches a user based on the provided email address.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
     @GetMapping("/email/{email}")
-    public ResponseEntity<UserDto> getUserByEmail(@PathVariable String email) {
+    public ResponseEntity<UserDto> getUserByEmail(@Parameter(description = "Email address of the user to fetch") @PathVariable String email) {
         Optional<UserDto> user = userService.getUserByEmail(email);
         return user
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    // Get all users
+    @Operation(summary = "Get all users", description = "Fetches a list of all users.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of users retrieved successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class)))
+    })
     @GetMapping
     public ResponseEntity<Iterable<UserDto>> getAllUsers() {
         Iterable<UserDto> users = userService.getAllUsers();
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
-    // Get a user by id
+    @Operation(summary = "Get user by ID", description = "Fetches a user based on the provided ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
+    public ResponseEntity<UserDto> getUserById(@Parameter(description = "ID of the user to fetch") @PathVariable Long id) {
         Optional<UserDto> user = userService.getUserById(id);
         return user.map(value -> new ResponseEntity<>(value, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    // Update user
+    @Operation(summary = "Update a user", description = "Updates the details of an existing user.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User updated successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))),
+            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @PutMapping("/{id}")
-    public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @RequestBody UserDto userDtoNew) {
+    public ResponseEntity<UserDto> updateUser(
+            @Parameter(description = "ID of the user to update")
+            @PathVariable Long id, @RequestBody UserDto userDtoNew) {
         Optional<UserDto> userDtoCurrent = userService.getUserById(id);
         if (userDtoCurrent.isPresent()) {
             Optional<UserDto> UserDtoUpdated = userService.updateUser(id, userDtoNew);
@@ -82,10 +128,13 @@ public class UserController {
         }
     }
 
-
-    // Delete user
+    @Operation(summary = "Delete a user", description = "Deletes a user based on the provided ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "User deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteUser(@Parameter(description = "ID of the user to delete") @PathVariable Long id) {
         Optional<UserDto> userDto = userService.getUserById(id);
         if (userDto.isPresent()) {
             userService.deleteUser(id);
@@ -94,5 +143,4 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
-
 }
