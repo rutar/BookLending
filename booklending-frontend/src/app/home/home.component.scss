@@ -1,0 +1,17 @@
+$primary-color: #4CAF50;
+$padding: 1rem;
+
+.home-container {
+  padding: $padding;
+  text-align: center;
+
+  h2 {
+    color: $primary-color;
+    margin-bottom: $padding;
+  }
+
+  p {
+    font-size: 1.2rem;
+    color: #666;
+  }
+}
