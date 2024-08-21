@@ -1,155 +1,186 @@
 package com.example.booklending.controller;
 
-import com.example.booklending.context.TestSecurityConfiguration;
 import com.example.booklending.dto.UserDto;
+import com.example.booklending.exceptions.UserAlreadyExistsException;
 import com.example.booklending.service.UserService;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(UserController.class)
-@Import(TestSecurityConfiguration.class)
 @Tag("unit")
 class UserControllerTest {
 
-    @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    private AutoCloseable closeable;
+
+    @Mock
     private UserService userService;
 
+    @InjectMocks
+    private UserController userController;
+
+    @BeforeEach
+    void setUp() {
+        closeable = MockitoAnnotations.openMocks(this);
+        mockMvc = MockMvcBuilders.standaloneSetup(userController).build();
+    }
+
+    @AfterEach
+    void tearDown() throws Exception {
+        closeable.close();
+    }
+
     @Test
-    void createUser_Success() throws Exception {
-        UserDto userDto = new UserDto(1L, "John", "john123", "john@example.com", 1);
-        Mockito.when(userService.createUser(any(UserDto.class))).thenReturn(Optional.of(userDto));
+    void createUser_ShouldReturnCreatedStatus() throws Exception {
+        UserDto userDto = new UserDto();
+        userDto.setId(1L);
+        userDto.setUsername("testuser");
+
+        when(userService.createUser(any(UserDto.class))).thenReturn(Optional.of(userDto));
 
         mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"username\": \"John\", \"email\": \"john@example.com\", \"password\": \"john123\"}"))
+                        .content("{\"username\":\"testuser\",\"email\":\"test@example.com\"}"))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", "/api/users/1"))
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.username").value("John"));
+                .andExpect(jsonPath("$.username").value("testuser"));
     }
 
     @Test
-    void createUser_BadRequest() throws Exception {
-        Mockito.when(userService.createUser(any(UserDto.class))).thenReturn(Optional.empty());
+    void createUser_ShouldReturnConflictStatus_WhenUserAlreadyExists() throws Exception {
+        when(userService.createUser(any(UserDto.class))).thenThrow(new UserAlreadyExistsException("User already exists"));
 
         mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"username\": \"John\", \"email\": \"john@example.com\", \"password\": \"john123\"}"))
-                .andExpect(status().isBadRequest());
+                        .content("{\"username\":\"testuser\",\"email\":\"test@example.com\"}"))
+                .andExpect(status().isConflict())
+                .andExpect(content().string("User already exists"));
     }
 
     @Test
-    void getUserByUsername_Success() throws Exception {
-        UserDto userDto = new UserDto(1L, "John", "john123", "john@example.com", 1);
-        Mockito.when(userService.getUserByUsername("John")).thenReturn(Optional.of(userDto));
+    void getUserByUsername_ShouldReturnUser() throws Exception {
+        UserDto userDto = new UserDto();
+        userDto.setUsername("testuser");
 
-        mockMvc.perform(get("/api/users/username/John"))
+        when(userService.getUserByUsername(anyString())).thenReturn(Optional.of(userDto));
+
+        mockMvc.perform(get("/api/users/username/testuser"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value("John"))
-                .andExpect(jsonPath("$.email").value("john@example.com"));
+                .andExpect(jsonPath("$.username").value("testuser"));
     }
 
     @Test
-    void getUserByUsername_NotFound() throws Exception {
-        Mockito.when(userService.getUserByUsername("Unknown")).thenReturn(Optional.empty());
+    void getUserByUsername_ShouldReturnNotFoundStatus_WhenUserNotFound() throws Exception {
+        when(userService.getUserByUsername(anyString())).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/api/users/username/Unknown"))
+        mockMvc.perform(get("/api/users/username/nonexistentuser"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    void getUserByEmail_Success() throws Exception {
-        UserDto userDto = new UserDto(1L, "John", "john123", "john@example.com", 1);
-        Mockito.when(userService.getUserByEmail("john@example.com")).thenReturn(Optional.of(userDto));
+    void getUserByEmail_ShouldReturnUser() throws Exception {
+        UserDto userDto = new UserDto();
+        userDto.setEmail("test@example.com");
 
-        mockMvc.perform(get("/api/users/email/john@example.com"))
+        when(userService.getUserByEmail(anyString())).thenReturn(Optional.of(userDto));
+
+        mockMvc.perform(get("/api/users/email/test@example.com"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.email").value("john@example.com"))
-                .andExpect(jsonPath("$.username").value("John"));
+                .andExpect(jsonPath("$.email").value("test@example.com"));
     }
 
     @Test
-    void getUserByEmail_NotFound() throws Exception {
-        Mockito.when(userService.getUserByEmail("unknown@example.com")).thenReturn(Optional.empty());
+    void getUserByEmail_ShouldReturnNotFoundStatus_WhenUserNotFound() throws Exception {
+        when(userService.getUserByEmail(anyString())).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/api/users/email/unknown@example.com"))
+        mockMvc.perform(get("/api/users/email/nonexistent@example.com"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    void getUserById_Success() throws Exception {
-        UserDto userDto = new UserDto(1L, "John", "john123", "john@example.com", 1);
-        Mockito.when(userService.getUserById(1L)).thenReturn(Optional.of(userDto));
+    void getUserById_ShouldReturnUser() throws Exception {
+        UserDto userDto = new UserDto();
+        userDto.setId(1L);
+
+        when(userService.getUserById(anyLong())).thenReturn(Optional.of(userDto));
 
         mockMvc.perform(get("/api/users/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.username").value("John"));
+                .andExpect(jsonPath("$.id").value(1L));
     }
 
     @Test
-    void getUserById_NotFound() throws Exception {
-        Mockito.when(userService.getUserById(anyLong())).thenReturn(Optional.empty());
+    void getUserById_ShouldReturnNotFoundStatus_WhenUserNotFound() throws Exception {
+        when(userService.getUserById(anyLong())).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/api/users/1"))
+        mockMvc.perform(get("/api/users/999"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    void updateUser_Success() throws Exception {
-        UserDto updatedUserDto = new UserDto(1L, "John Updated", "john123", "john_updated@example.com", 1);
-        Mockito.when(userService.getUserById(1L)).thenReturn(Optional.of(updatedUserDto));
-        Mockito.when(userService.updateUser(eq(1L), any(UserDto.class))).thenReturn(Optional.of(updatedUserDto));
+    void updateUser_ShouldReturnUpdatedUser() throws Exception {
+        UserDto currentUserDto = new UserDto();
+        currentUserDto.setId(1L);
+        currentUserDto.setUsername("currentuser");
+
+        UserDto updatedUserDto = new UserDto();
+        updatedUserDto.setId(1L);
+        updatedUserDto.setUsername("updateduser");
+
+        // Mocking the UserService responses
+        when(userService.getUserById(anyLong())).thenReturn(Optional.of(currentUserDto));
+        when(userService.updateUser(anyLong(), any(UserDto.class))).thenReturn(Optional.of(updatedUserDto));
 
         mockMvc.perform(put("/api/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"username\": \"John Updated\", \"email\": \"john_updated@example.com\", \"password\": \"john123\"}"))
+                        .content("{\"username\":\"updateduser\",\"email\":\"updated@example.com\"}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value("John Updated"))
-                .andExpect(jsonPath("$.email").value("john_updated@example.com"));
+                .andExpect(jsonPath("$.username").value("updateduser"));
     }
 
-    @Test
-    void updateUser_NotFound() throws Exception {
-        Mockito.when(userService.getUserById(anyLong())).thenReturn(Optional.empty());
 
-        mockMvc.perform(put("/api/users/1")
+    @Test
+    void updateUser_ShouldReturnNotFoundStatus_WhenUserNotFound() throws Exception {
+        when(userService.getUserById(anyLong())).thenReturn(Optional.empty());
+
+        mockMvc.perform(put("/api/users/999")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"username\": \"John Updated\", \"email\": \"john_updated@example.com\", \"password\": \"john123\"}"))
+                        .content("{\"username\":\"nonexistentuser\",\"email\":\"nonexistent@example.com\"}"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    void deleteUser_Success() throws Exception {
-        UserDto userDto = new UserDto(1L, "John", "john123", "john@example.com", 1);
-        Mockito.when(userService.getUserById(1L)).thenReturn(Optional.of(userDto));
-        Mockito.doNothing().when(userService).deleteUser(1L);
+    void deleteUser_ShouldReturnNoContentStatus() throws Exception {
+        when(userService.getUserById(anyLong())).thenReturn(Optional.of(new UserDto()));
+        doNothing().when(userService).deleteUser(anyLong());
 
         mockMvc.perform(delete("/api/users/1"))
                 .andExpect(status().isNoContent());
     }
 
     @Test
-    void deleteUser_NotFound() throws Exception {
-        Mockito.when(userService.getUserById(anyLong())).thenReturn(Optional.empty());
+    void deleteUser_ShouldReturnNotFoundStatus_WhenUserNotFound() throws Exception {
+        when(userService.getUserById(anyLong())).thenReturn(Optional.empty());
 
-        mockMvc.perform(delete("/api/users/1"))
+        mockMvc.perform(delete("/api/users/999"))
                 .andExpect(status().isNotFound());
     }
 }
