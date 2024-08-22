@@ -28,14 +28,12 @@ databaseChangeLog:
                     nullable: false
                     unique: true
               - column:
-                  name: available_copies
-                  type: INTEGER
+                  name: status
+                  type: varchar(50)
                   constraints:
                     nullable: false
-                  defaultValue: '0'
               - column:
-                  name: total_copies
-                  type: INTEGER
+                  name: cover_url
+                  type: varchar(255)
                   constraints:
-                    nullable: false
-                  defaultValue: '0'
+                    nullable: true

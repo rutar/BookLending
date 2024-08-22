@@ -19,6 +19,10 @@ spring:
     serialization:
       indent-output: true
 
+app:
+  secret:
+    key: 6vOyI8689GpY/yTFeIOr0Rcg+ip6sTUb/3SemiWOYGc=
+
 liquibase:
   change-log: classpath:db/changelog/db.changelog-master.yaml
   contexts: development, production

@@ -21,6 +21,8 @@ public class Book {
     private String title;
     private String author;
     private String isbn;
-    private Integer availableCopies;
-    private Integer totalCopies;
+    private String status; // Book status (available, lent_out, reserved)
+    private String coverUrl; // Store image URL
 }
+
+
