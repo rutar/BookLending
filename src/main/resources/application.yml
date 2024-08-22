@@ -46,3 +46,7 @@ springdoc:
     path: /swagger-ui.html # Path to access Swagger UI
     enabled: true # Enable or disable Swagger UI
     url: /v3/api-docs # URL to fetch the OpenAPI documentation
+
+data:
+  populate:
+    enabled: true
