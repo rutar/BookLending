@@ -57,7 +57,7 @@ class AuthControllerTest {
         when(authService.authenticateAndGenerateToken(anyString(), anyString())).thenReturn(expectedToken);
 
         // Act & Assert
-        mockMvc.perform(post("/auth/login")
+        mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"username\": \"" + username + "\", \"password\": \"" + password + "\"}"))
                 .andExpect(status().isOk())

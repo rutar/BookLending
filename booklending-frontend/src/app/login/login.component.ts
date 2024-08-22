@@ -1,34 +1,36 @@
 import { Component } from '@angular/core';
-import { AuthService } from '../auth/auth.service'; // Adjust the import path as necessary
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { AuthService } from '../auth/auth.service';
 
 @Component({
-  selector: 'app-login',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss'] // Assuming SCSS is used
+    selector: 'app-login',
+    standalone: true,
+    imports: [CommonModule, FormsModule],
+    templateUrl: './login.component.html',
+    styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent {
-  username: string = '';
-  password: string = '';
+    username: string = '';
+    password: string = '';
+    errorMessage: string = '';
 
-  constructor(private authService: AuthService, private router: Router) {}
+    constructor(private authService: AuthService, private http: HttpClient, private router: Router) {}
 
-  onSubmit(): void {
-    if (this.username && this.password) {
-      this.authService.login(this.username, this.password).subscribe({
-        next: (response) => {
-          const token = response.token; // Adjust based on your backend response
+    login() {
+      this.authService.login(this.username, this.password).subscribe(
+        (token: string) => {
+          // Save the JWT token
           this.authService.saveToken(token);
-          this.router.navigate(['/']); // Redirect to home or another route
+          // Redirect to a different page after login
+          this.router.navigate(['/home']);
         },
-        error: (err) => {
-          console.error('Login failed', err);
-          // Handle login error, show a message to the user, etc.
+        (error) => {
+          console.error('Login failed', error);
+          alert('Invalid username or password');
         }
-      });
-    } else {
-      console.error('Username or password is missing.');
-      // Optionally, show an error message to the user
+      );
     }
-  }
 }

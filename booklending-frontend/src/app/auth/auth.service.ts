@@ -7,12 +7,12 @@ import { Observable } from 'rxjs';
 })
 export class AuthService {
 
-  private baseUrl = 'http://localhost:8080/auth';  // Adjust to your backend URL
+  private baseUrl = 'http://localhost:8080/api/auth';  // Adjust to your backend URL
 
   constructor(private http: HttpClient) { }
 
-  login(username: string, password: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/login`, { username, password });
+  login(username: string, password: string): Observable<string> {
+    return this.http.post(`${this.baseUrl}/login`, { username, password }, { responseType: 'text' });
   }
 
   saveToken(token: string) {

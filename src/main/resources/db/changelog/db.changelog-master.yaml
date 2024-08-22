@@ -7,3 +7,5 @@ databaseChangeLog:
       file: db/changelog/03-books.yaml
   - include:
       file: db/changelog/04-reservations.yaml
+  - include:
+      file: db/changelog/05-defaultusers.yaml

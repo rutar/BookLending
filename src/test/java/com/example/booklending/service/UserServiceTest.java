@@ -1,6 +1,7 @@
 package com.example.booklending.service;
 
 import com.example.booklending.dto.UserDto;
+import com.example.booklending.exceptions.ConflictException;
 import com.example.booklending.model.User;
 import com.example.booklending.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -12,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,8 +21,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @Tag("unit")
@@ -53,7 +54,6 @@ class UserServiceTest {
         userDto.setPassword("test123");
         userDto.setEmail("test@example.com");
         userDto.setRoleId(1);
-
     }
 
     @Test
@@ -69,9 +69,36 @@ class UserServiceTest {
     }
 
     @Test
+    void createUser_shouldThrowConflictExceptionWhenUsernameExists() {
+        when(userRepository.findByUsername(userDto.getUsername())).thenReturn(Optional.of(user));
+
+        assertThrows(ConflictException.class, () -> userService.createUser(userDto));
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void createUser_shouldThrowConflictExceptionWhenEmailExists() {
+        when(userRepository.findByEmail(userDto.getEmail())).thenReturn(Optional.of(user));
+
+        assertThrows(ConflictException.class, () -> userService.createUser(userDto));
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void createUser_shouldReturnEmptyOptionalOnGeneralException() {
+        when(userRepository.save(any(User.class))).thenThrow(new RuntimeException("Unexpected error"));
+        when(modelMapper.map(userDto, User.class)).thenReturn(user);
+
+        Optional<UserDto> result = userService.createUser(userDto);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
     void getUserById_shouldReturnUserDtoWhenUserExists() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(modelMapper.map(user, UserDto.class)).thenReturn(userDto);
+
         Optional<UserDto> result = userService.getUserById(1L);
 
         assertTrue(result.isPresent());
@@ -97,6 +124,16 @@ class UserServiceTest {
 
         assertEquals(Optional.of(userDto), result);
         verify(userRepository).save(user);
+    }
+
+    @Test
+    void updateUser_shouldReturnEmptyOptionalWhenUpdateFails() {
+        when(modelMapper.map(userDto, User.class)).thenReturn(user);
+        when(userRepository.save(any(User.class))).thenReturn(null);  // Simulating a failure in save
+
+        Optional<UserDto> result = userService.updateUser(1L, userDto);
+
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -127,6 +164,15 @@ class UserServiceTest {
     }
 
     @Test
+    void getUserByUsername_shouldReturnEmptyOptionalWhenUserDoesNotExist() {
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.empty());
+
+        Optional<UserDto> result = userService.getUserByUsername("testuser");
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
     void getUserByEmail_shouldReturnUserDtoWhenUserExists() {
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
         when(modelMapper.map(user, UserDto.class)).thenReturn(userDto);
@@ -138,10 +184,19 @@ class UserServiceTest {
     }
 
     @Test
+    void getUserByEmail_shouldReturnEmptyOptionalWhenUserDoesNotExist() {
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
+
+        Optional<UserDto> result = userService.getUserByEmail("test@example.com");
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
     void getAllUsers_shouldReturnListOfUserDtos() {
         List<User> users = new ArrayList<>();
         users.add(user);
-        when(userRepository.findAll()).thenReturn(users.stream().toList());
+        when(userRepository.findAll()).thenReturn(users);
         when(modelMapper.map(user, UserDto.class)).thenReturn(userDto);
 
         Iterable<UserDto> result = userService.getAllUsers();
@@ -149,5 +204,24 @@ class UserServiceTest {
         assertNotNull(result);
         assertTrue(result.iterator().hasNext());
         assertEquals(userDto, result.iterator().next());
+    }
+
+    @Test
+    void loadUserByUsername_shouldReturnUserDetailsWhenUserExists() {
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
+
+        org.springframework.security.core.userdetails.UserDetails result = userService.loadUserByUsername("testuser");
+
+        assertNotNull(result);
+        assertEquals("testuser", result.getUsername());
+        assertEquals("test123", result.getPassword());
+        assertTrue(result.getAuthorities().isEmpty());
+    }
+
+    @Test
+    void loadUserByUsername_shouldThrowUsernameNotFoundExceptionWhenUserDoesNotExist() {
+        when(userRepository.findByUsername("nonexistent")).thenReturn(Optional.empty());
+
+        assertThrows(UsernameNotFoundException.class, () -> userService.loadUserByUsername("nonexistent"));
     }
 }
