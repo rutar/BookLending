@@ -25,7 +25,7 @@ export class LoginComponent {
           // Save the JWT token
           this.authService.saveToken(token);
           // Redirect to a different page after login
-          this.router.navigate(['/home']);
+          this.router.navigate(['/dashboard']);
         },
         (error) => {
           console.error('Login failed', error);

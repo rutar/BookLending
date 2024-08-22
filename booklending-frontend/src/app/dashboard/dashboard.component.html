@@ -1,0 +1,23 @@
+<!-- dashboard.component.html -->
+<div class="dashboard-container">
+  <header class="content-header">
+    <h1>Books Lending</h1>
+  </header>
+
+  <button (click)="onAddBook()" class="add-btn">Add New Book</button>
+
+  <section class="content-body">
+    <div class="book-grid">
+      <div *ngFor="let book of books" class="book-card">
+        <img [src]="book.coverUrl" alt="{{ book.title }}" class="book-cover">
+        <h3>{{ book.title }}</h3>
+        <p>{{ book.author }}</p>
+        <p>Status: <span [ngClass]="{'available': book.status === 'available', 'lentout': book.status === 'lentout', 'reserved': book.status === 'reserved'}">{{ book.status | titlecase }}</span></p>
+
+        <button *ngIf="book.status === 'reserved'" (click)="onCancelReservation(book)" class="cancel-btn">Cancel Reservation</button>
+        <button *ngIf="book.status === 'lentout'" (click)="onMarkReturned(book)" class="return-btn">Mark as Returned</button>
+        <button (click)="onRemoveBook(book)" class="remove-btn">Remove Book</button>
+      </div>
+    </div>
+  </section>
+</div>
