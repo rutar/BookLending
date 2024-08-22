@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { LoginComponent } from './login.component';
-import { AuthService } from '../auth/auth.service';
+import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
@@ -35,7 +35,7 @@ describe('LoginComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should call authService.login and navigate to /home on successful login', () => {
+  it('should call authService.login and navigate to /dashboard on successful login', () => {
     component.username = 'testuser';
     component.password = 'password';
 
@@ -43,7 +43,7 @@ describe('LoginComponent', () => {
 
     expect(authServiceMock.login).toHaveBeenCalledWith('testuser', 'password');
     expect(authServiceMock.saveToken).toHaveBeenCalledWith('mock-token');
-    expect(routerMock.navigate).toHaveBeenCalledWith(['/home']);
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/dashboard']);
   });
 
   it('should show an error message on failed login', () => {

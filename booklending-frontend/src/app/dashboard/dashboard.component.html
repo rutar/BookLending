@@ -1,22 +1,57 @@
-<!-- dashboard.component.html -->
 <div class="dashboard-container">
+  <!-- Add Book Modal -->
+  <div *ngIf="isAddBookModalVisible" class="modal-overlay" (click)="onCloseModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <button class="close-btn" (click)="onCloseModal()">×</button>
+      <app-add-book (bookAdded)="onBookAdded()"></app-add-book>
+    </div>
+  </div>
+
   <header class="content-header">
     <h1>Books Lending</h1>
   </header>
 
   <button (click)="onAddBook()" class="add-btn">Add New Book</button>
 
+  <!-- Book List and Grid -->
   <section class="content-body">
     <div class="book-grid">
       <div *ngFor="let book of books" class="book-card">
         <img [src]="book.coverUrl" alt="{{ book.title }}" class="book-cover">
         <h3>{{ book.title }}</h3>
         <p>{{ book.author }}</p>
-        <p>Status: <span [ngClass]="{'available': book.status === 'available', 'lentout': book.status === 'lentout', 'reserved': book.status === 'reserved'}">{{ book.status | titlecase }}</span></p>
+        <p>
+          Status:
+          <span
+            [ngClass]="{
+              'available': book.status === 'available',
+              'lentout': book.status === 'lentout',
+              'reserved': book.status === 'reserved'
+            }">
+            {{ book.status | titlecase }}
+          </span>
+        </p>
 
-        <button *ngIf="book.status === 'reserved'" (click)="onCancelReservation(book)" class="cancel-btn">Cancel Reservation</button>
-        <button *ngIf="book.status === 'lentout'" (click)="onMarkReturned(book)" class="return-btn">Mark as Returned</button>
-        <button (click)="onRemoveBook(book)" class="remove-btn">Remove Book</button>
+        <div class="button-group">
+          <button
+            *ngIf="book.status === 'reserved'"
+            (click)="onCancelReservation(book)"
+            class="cancel-btn">
+            Cancel Reservation
+          </button>
+          <button
+            *ngIf="book.status === 'lentout'"
+            (click)="onMarkReturned(book)"
+            class="return-btn">
+            Mark as Returned
+          </button>
+          <button
+            *ngIf="book.status === 'available'"
+            (click)="onRemoveBook(book)"
+            class="remove-btn">
+            Remove Book
+          </button>
+        </div>
       </div>
     </div>
   </section>

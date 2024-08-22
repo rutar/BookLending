@@ -1,57 +1,80 @@
-import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { CommonModule } from '@angular/common'; // Import CommonModule
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { AddBookComponent } from '../add-book/add-book.component'; // Adjust the path if necessary
+import { NotificationService } from '../services/notification.service';
+import {Book, BooksService} from "../services/books.service"; // Adjust the path if necessary
+import { HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
-  imports: [CommonModule] // Add CommonModule here
+  imports: [HttpClientModule, CommonModule, AddBookComponent] // Import CommonModule here
 })
-export class DashboardComponent implements OnInit {
-  books: any[] = [];
+export class DashboardComponent {
+  isAddBookModalVisible = false;
 
-  constructor(private http: HttpClient) {}
+  constructor(private notificationService: NotificationService, private booksService: BooksService) {}
+
+  onAddBook() {
+    this.isAddBookModalVisible = true;
+  }
+
+  onCloseModal() {
+    this.isAddBookModalVisible = false;
+  }
+
+  onBookAdded() {
+    this.isAddBookModalVisible = false; // Close the modal when a book is added
+  }
+
+
+
+  books: Book[] = [];
+
+
 
   ngOnInit(): void {
     this.loadBooks();
   }
 
+  // Load all books from the backend
   loadBooks(): void {
-    // Replace with your actual API endpoint
-    this.http.get<any[]>('/api/books').subscribe(data => {
+    this.booksService.getBooks().subscribe(data => {
       this.books = data;
     });
   }
 
-  onAddBook(): void {
-    // Logic to add a new book
-  }
 
-  onCancelReservation(book: any): void {
-    // Logic to cancel reservation
-    // Update book status to available
+  // Cancel a reservation and update the book's status to available
+  onCancelReservation(book: Book): void {
     book.status = 'available';
-    this.updateBook(book);
+    this.booksService.updateBook(book).subscribe(updatedBook => {
+      this.updateBookInList(updatedBook);
+    });
   }
 
-  onMarkReturned(book: any): void {
-    // Logic to mark a book as returned
-    // Update book status to available
+  // Mark a book as returned by updating its status to available
+  onMarkReturned(book: Book): void {
     book.status = 'available';
-    this.updateBook(book);
+    this.booksService.updateBook(book).subscribe(updatedBook => {
+      this.updateBookInList(updatedBook);
+    });
   }
 
-  onRemoveBook(book: any): void {
-    // Logic to remove a book
-    this.http.delete(`/api/books/${book.id}`).subscribe(() => {
+  // Remove a book from the list and the backend
+  onRemoveBook(book: Book): void {
+    this.booksService.deleteBook(book.id).subscribe(() => {
       this.books = this.books.filter(b => b.id !== book.id);
     });
   }
 
-  private updateBook(book: any): void {
-    // Replace with your actual API endpoint
-    this.http.put(`/api/books/${book.id}`, book).subscribe();
+  // Helper method to update a book in the local list after an update
+  private updateBookInList(updatedBook: Book): void {
+    const index = this.books.findIndex(b => b.id === updatedBook.id);
+    if (index !== -1) {
+      this.books[index] = updatedBook;
+    }
   }
 }

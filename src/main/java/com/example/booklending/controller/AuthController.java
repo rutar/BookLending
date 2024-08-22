@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:4200")  // Allow your Angular app's URL
+@CrossOrigin(origins = "http://localhost:4200")  // Allow Angular app's URL
 @RequiredArgsConstructor
 public class AuthController {
 

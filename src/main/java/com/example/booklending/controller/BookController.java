@@ -21,6 +21,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/books")
+@CrossOrigin(origins = "http://localhost:4200")  // Allow Angular app's URL
 @Tag(name = "Books", description = "Endpoints for managing books")
 public class BookController {
 
