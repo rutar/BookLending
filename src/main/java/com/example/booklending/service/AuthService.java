@@ -1,6 +1,7 @@
 package com.example.booklending.service;
 
 import com.example.booklending.configuration.JwtUtil;
+import com.example.booklending.configuration.RoleIdGrantedAuthority;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +10,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +25,8 @@ public class AuthService {
     public String authenticateAndGenerateToken(String username, String password) {
         logger.info("Attempting to authenticate user: {}", username);
 
+
+
         try {
             // Authenticate the user
             Authentication authentication = authenticationManager.authenticate(
@@ -31,8 +36,13 @@ public class AuthService {
 
             logger.info("User authenticated successfully: {}", username);
 
+            Optional<Integer> roleId = authentication.getAuthorities().stream()
+                    .filter(authority -> authority instanceof RoleIdGrantedAuthority)  // Filter custom authority
+                    .map(authority -> ((RoleIdGrantedAuthority) authority).getRoleId()) // Extract roleId
+                    .findFirst();  // Return the first matching roleId
+
             // Generate and return JWT token
-            String token = jwtUtil.generateToken(username);
+            String token = jwtUtil.generateToken(username, roleId);
             logger.info("Generated JWT token for user: {}", username);
 
             return token;

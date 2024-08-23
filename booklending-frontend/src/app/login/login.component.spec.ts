@@ -1,64 +1,151 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { Router } from '@angular/router';
+import { of, throwError } from 'rxjs';
 import { LoginComponent } from './login.component';
 import { AuthService } from '../services/auth.service';
-import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
-import { of, throwError } from 'rxjs';
+
+// Mock Router
+class MockRouter {
+  navigate(commands: any[]) {
+    // Mock implementation of navigate
+  }
+}
 
 describe('LoginComponent', () => {
   let component: LoginComponent;
   let fixture: ComponentFixture<LoginComponent>;
-  let authServiceMock: any;
-  let routerMock: any;
+  let httpMock: HttpTestingController;
+  let authService: AuthService;
+  let router: Router;
 
   beforeEach(async () => {
-    authServiceMock = {
-      login: jasmine.createSpy('login').and.returnValue(of('mock-token')),
-      saveToken: jasmine.createSpy('saveToken')
-    };
-
-    routerMock = {
-      navigate: jasmine.createSpy('navigate')
-    };
-
     await TestBed.configureTestingModule({
-      imports: [FormsModule, HttpClientModule, LoginComponent], // Add HttpClientModule to imports
+      imports: [
+        HttpClientTestingModule,  // Import for HttpClientTesting
+        CommonModule,             // Import for CommonModule
+        FormsModule,              // Import for FormsModule
+        LoginComponent            // Import the standalone component here
+      ],
       providers: [
-        { provide: AuthService, useValue: authServiceMock },
-        { provide: Router, useValue: routerMock }
+        AuthService,
+        { provide: Router, useClass: MockRouter }  // Provide the mocked router
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(LoginComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    httpMock = TestBed.inject(HttpTestingController);
+    authService = TestBed.inject(AuthService);
+    router = TestBed.inject(Router);
   });
 
-  it('should call authService.login and navigate to /dashboard on successful login', () => {
-    component.username = 'testuser';
+  afterEach(() => {
+    httpMock.verify();
+  });
+
+  it('should navigate to dashboard for role ID 1', () => {
+    const spy = spyOn(router, 'navigate');
+    const mockToken = 'mock.jwt.token';
+    const mockRole = 1; // Role ID as a number
+
+    spyOn(authService, 'login').and.returnValue(of(mockToken));
+    spyOn(authService, 'saveToken').and.callThrough();
+    spyOn(authService, 'getRoleFromToken').and.returnValue(mockRole);
+
+    component.username = 'admin';
     component.password = 'password';
-
     component.login();
 
-    expect(authServiceMock.login).toHaveBeenCalledWith('testuser', 'password');
-    expect(authServiceMock.saveToken).toHaveBeenCalledWith('mock-token');
-    expect(routerMock.navigate).toHaveBeenCalledWith(['/dashboard']);
+    // Ensure the HTTP request is made
+    const req = httpMock.expectOne('http://localhost:8080/api/auth/login');
+    expect(req.request.method).toBe('POST');
+    req.flush(mockToken);
+
+    expect(authService.saveToken).toHaveBeenCalledWith(mockToken);
+    expect(spy).toHaveBeenCalledWith(['/dashboard']);
   });
 
-  it('should show an error message on failed login', () => {
-    authServiceMock.login.and.returnValue(throwError({ status: 401 }));
+  it('should navigate to home for role ID 2', () => {
+    const spy = spyOn(router, 'navigate');
+    const mockToken = 'mock.jwt.token';
+    const mockRole = 2; // Role ID as a number
 
+    spyOn(authService, 'login').and.returnValue(of(mockToken));
+    spyOn(authService, 'saveToken').and.callThrough();
+    spyOn(authService, 'getRoleFromToken').and.returnValue(mockRole);
+
+    component.username = 'user';
+    component.password = 'password';
     component.login();
 
-    expect(authServiceMock.login).toHaveBeenCalledWith(component.username, component.password);
-    expect(authServiceMock.saveToken).not.toHaveBeenCalled();
-    expect(routerMock.navigate).not.toHaveBeenCalled();
+    // Ensure the HTTP request is made
+    const req = httpMock.expectOne('http://localhost:8080/api/auth/login');
+    expect(req.request.method).toBe('POST');
+    req.flush(mockToken);
+
+    expect(authService.saveToken).toHaveBeenCalledWith(mockToken);
+    expect(spy).toHaveBeenCalledWith(['/home']);
   });
 
-  it('should initialize with default values', () => {
-    expect(component.username).toBe('');
-    expect(component.password).toBe('');
-    expect(component.errorMessage).toBe('');
+  it('should navigate to login if role ID is null', () => {
+    const spy = spyOn(router, 'navigate');
+    const mockToken = 'mock.jwt.token';
+
+    spyOn(authService, 'login').and.returnValue(of(mockToken));
+    spyOn(authService, 'saveToken').and.callThrough();
+    spyOn(authService, 'getRoleFromToken').and.returnValue(null);
+
+    component.username = 'user';
+    component.password = 'password';
+    component.login();
+
+    // Ensure the HTTP request is made
+    const req = httpMock.expectOne('http://localhost:8080/api/auth/login');
+    expect(req.request.method).toBe('POST');
+    req.flush(mockToken);
+
+    expect(authService.saveToken).toHaveBeenCalledWith(mockToken);
+    expect(spy).toHaveBeenCalledWith(['/login']);
+  });
+
+  it('should navigate to login if role ID is unknown', () => {
+    const spy = spyOn(router, 'navigate');
+    const mockToken = 'mock.jwt.token';
+    const mockRole = 999; // Unknown role ID
+
+    spyOn(authService, 'login').and.returnValue(of(mockToken));
+    spyOn(authService, 'saveToken').and.callThrough();
+    spyOn(authService, 'getRoleFromToken').and.returnValue(mockRole);
+
+    component.username = 'user';
+    component.password = 'password';
+    component.login();
+
+    // Ensure the HTTP request is made
+    const req = httpMock.expectOne('http://localhost:8080/api/auth/login');
+    expect(req.request.method).toBe('POST');
+    req.flush(mockToken);
+
+    expect(authService.saveToken).toHaveBeenCalledWith(mockToken);
+    expect(spy).toHaveBeenCalledWith(['/login']);
+  });
+
+  it('should handle login error', () => {
+    spyOn(authService, 'login').and.returnValue(throwError(() => new Error('Login failed')));
+    spyOn(window, 'alert').and.callThrough();
+
+    component.username = 'user';
+    component.password = 'password';
+    component.login();
+
+    // Ensure the HTTP request is made
+    const req = httpMock.expectOne('http://localhost:8080/api/auth/login');
+    expect(req.request.method).toBe('POST');
+    req.flush('Login failed', { status: 401, statusText: 'Unauthorized' });
+
+    expect(window.alert).toHaveBeenCalledWith('Invalid username or password');
   });
 });

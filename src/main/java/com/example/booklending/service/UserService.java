@@ -1,22 +1,25 @@
 package com.example.booklending.service;
 
+import com.example.booklending.configuration.RoleIdGrantedAuthority;
 import com.example.booklending.dto.UserDto;
 import com.example.booklending.exceptions.ConflictException;
 import com.example.booklending.exceptions.UserAlreadyExistsException;
 import com.example.booklending.model.User;
 import com.example.booklending.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -138,7 +141,7 @@ public class UserService implements UserDetailsService {
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
-                new ArrayList<>());  // No authorities are used in this project
+                List.of(new RoleIdGrantedAuthority(user.getRoleId())));
     }
 
     private Optional<UserDto> dtoFromEntity(User user) {
@@ -150,4 +153,8 @@ public class UserService implements UserDetailsService {
         log.debug("Mapping user DTO to entity for user ID: {}", userDto.getId());
         return Optional.of(modelMapper.map(userDto, User.class));
     }
+
 }
+
+
+

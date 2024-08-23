@@ -1,26 +1,53 @@
 package com.example.booklending.configuration;
 
+import com.example.booklending.model.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 @Component
 public class JwtUtil {
 
-    @Value("${app.secret.key}")
+    @Value("${jwt.key}")
     private final String secretKey = System.getenv("APP_SECRET_KEY");
 
-    public String generateToken(String username) {
+    @Value("${jwt.expiration}")
+    private long expirationTime;
+
+//    public String generateToken(String username) {
+//        return Jwts.builder()
+//                .setSubject(username)
+//                .setIssuedAt(new Date())
+//                .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
+//                .signWith(SignatureAlgorithm.HS256, secretKey)
+//                .compact();
+//    }
+
+    // Method to generate token with role included in the payload
+    public String generateToken(String username, Optional<Integer> roleId) {
+        Map<String, Object> claims = new HashMap<>();
+
+        roleId.ifPresentOrElse(
+                id -> claims.put("roleId", id),
+                () -> claims.put("roleId", null)
+        );
+
         return Jwts.builder()
+                .setClaims(claims)
                 .setSubject(username)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 hours validity
-                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
+                .signWith(SignatureAlgorithm.HS512, secretKey)
                 .compact();
     }
+
 
     public String extractUsername(String token) {
         return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
