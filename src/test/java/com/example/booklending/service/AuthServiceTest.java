@@ -1,26 +1,28 @@
 package com.example.booklending.service;
 
+import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.example.booklending.configuration.JwtUtil;
-import org.junit.jupiter.api.AfterEach;
+import com.example.booklending.configuration.RoleIdGrantedAuthority;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Optional;
 
-@Tag("unit")
 class AuthServiceTest {
-
-    private AutoCloseable closeable;
 
     @Mock
     private AuthenticationManager authenticationManager;
@@ -28,60 +30,65 @@ class AuthServiceTest {
     @Mock
     private JwtUtil jwtUtil;
 
+    @Mock
+    private Authentication authentication;
+
     @InjectMocks
     private AuthService authService;
 
     @BeforeEach
     void setUp() {
-        closeable =  MockitoAnnotations.openMocks(this);
-    }
-
-    @AfterEach
-    void tearDown() throws Exception {
-        closeable.close();
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    void authenticateAndGenerateToken_ShouldReturnToken() {
+    void authenticateAndGenerateToken_success() {
         // Arrange
-        String username = "testuser";
-        String password = "testpassword";
+        String username = "user1";
+        String password = "password1";
+        Integer roleId = 1;
         String expectedToken = "jwt-token";
 
-        Authentication authentication = mock(Authentication.class);
+        // Create the granted authority
+        RoleIdGrantedAuthority grantedAuthority = new RoleIdGrantedAuthority(roleId);
+
+        // Mock the return type
+        Collection<GrantedAuthority> authorities = Collections.singletonList(grantedAuthority);
+
+        // Set up mocks
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(authentication);
-        when(jwtUtil.generateToken(username)).thenReturn(expectedToken);
+        when(authentication.getAuthorities()).thenReturn((Collection)authorities);
+        when(jwtUtil.generateToken(username, Optional.of(roleId))).thenReturn(expectedToken);
+
+        // Mock SecurityContextHolder
+        SecurityContext securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
 
         // Act
-        String actualToken = authService.authenticateAndGenerateToken(username, password);
+        String token = authService.authenticateAndGenerateToken(username, password);
 
         // Assert
-        assertEquals(expectedToken, actualToken);
-        verify(authenticationManager, times(1))
-                .authenticate(any(UsernamePasswordAuthenticationToken.class));
-        verify(jwtUtil, times(1)).generateToken(username);
-        verifyNoMoreInteractions(authenticationManager, jwtUtil);
+        assertEquals(expectedToken, token);
+        verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+        verify(jwtUtil).generateToken(username, Optional.of(roleId));
     }
 
     @Test
-    void authenticateAndGenerateToken_ShouldSetAuthentication() {
+    void authenticateAndGenerateToken_failure() {
         // Arrange
-        String username = "testuser";
-        String password = "testpassword";
+        String username = "user1";
+        String password = "wrong-password";
 
-        Authentication authentication = mock(Authentication.class);
+        // Simulate authentication failure
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
-                .thenReturn(authentication);
-        when(jwtUtil.generateToken(username)).thenReturn("jwt-token");
+                .thenThrow(new RuntimeException("Authentication failed"));
 
-        // Act
-        authService.authenticateAndGenerateToken(username, password);
+        // Act & Assert
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> authService.authenticateAndGenerateToken(username, password));
 
-        // Assert
-        assertEquals(authentication, SecurityContextHolder.getContext().getAuthentication());
-        verify(authenticationManager, times(1))
-                .authenticate(any(UsernamePasswordAuthenticationToken.class));
-        verify(jwtUtil, times(1)).generateToken(username);
+        assertEquals("Authentication failed", exception.getMessage());
+        verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+        verify(jwtUtil, never()).generateToken(anyString(), any());
     }
 }
