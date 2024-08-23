@@ -215,7 +215,7 @@ class UserServiceTest {
         assertNotNull(result);
         assertEquals("testuser", result.getUsername());
         assertEquals("test123", result.getPassword());
-        assertTrue(result.getAuthorities().isEmpty());
+        assertFalse(result.getAuthorities().isEmpty());
     }
 
     @Test
