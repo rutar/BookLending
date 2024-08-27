@@ -4,6 +4,7 @@ import {Router} from '@angular/router';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {AuthService} from '../services/auth.service';
+import {NotificationService} from '../services/notification.service';
 
 @Component({
   selector: 'app-login',
@@ -17,7 +18,7 @@ export class LoginComponent {
   password: string = '';
   errorMessage: string = '';
 
-  constructor(private authService: AuthService, private http: HttpClient, private router: Router) {
+  constructor(private authService: AuthService, private http: HttpClient, private router: Router, private notificationService: NotificationService) {
   }
 
   login() {
@@ -27,27 +28,27 @@ export class LoginComponent {
         this.authService.saveToken(token);
 
         // Decode the role from the token
-        const roleId = this.authService.getRoleFromToken();
+        const roleName = this.authService.getRoleNameFromToken();
 
 
 
         // Navigate based on the user role
-        if (roleId === null) {
-          console.error('Role ID is null. Redirecting to login.');
+        if (roleName === null) {
+          console.error('Role name is null. Redirecting to login.');
           this.router.navigate(['/login']); // Redirect to login or error page if role is null
-        } else if (roleId === 1) {  // Assuming role ID 1 represents admin
+        } else if (roleName === 'ADMIN') {  // Assuming role name represents admin
           this.router.navigate(['/dashboard']);
-        } else if (roleId === 2) {  // Assuming role ID 2 represents user
+        } else if (roleName === "USER") {  // Assuming role name represents user
           this.router.navigate(['/home']);
         } else {
-          console.error('Unknown role ID:', roleId);
+          console.error('Unknown role:', roleName);
           console.error('Redirecting to login.');
           this.router.navigate(['/login']);
         }
       },
       (error) => {
         console.error('Login failed', error);
-        alert('Invalid username or password');
+        this.notificationService.openDialog('Invalid username or password.', true);
       }
     );
   }

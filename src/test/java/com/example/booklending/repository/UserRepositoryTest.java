@@ -36,7 +36,7 @@ public class UserRepositoryTest extends AbstractIntegrationTest {
         User user = new User();
         user.setEmail("test@example.com");
         user.setPassword("password");
-        user.setRoleId(role.getId()); // Ensure this ID exists in the roles table
+        user.setRole(role); // Ensure this ID exists in the roles table
         user.setUsername("testuser");
 
         userRepository.save(user);
@@ -58,7 +58,7 @@ public class UserRepositoryTest extends AbstractIntegrationTest {
         User user = new User();
         user.setEmail("unique@example.com");
         user.setPassword("password");
-        user.setRoleId(role.getId()); // Ensure this ID exists in the roles table
+        user.setRole(role); // Ensure this ID exists in the roles table
         user.setUsername("uniqueuser");
 
         userRepository.save(user);

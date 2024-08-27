@@ -1,10 +1,8 @@
 package com.example.booklending.configuration;
 
-import com.example.booklending.model.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -31,12 +29,12 @@ public class JwtUtil {
 //    }
 
     // Method to generate token with role included in the payload
-    public String generateToken(String username, Optional<Integer> roleId) {
+    public String generateToken(String username, Optional<String> roleName) {
         Map<String, Object> claims = new HashMap<>();
 
-        roleId.ifPresentOrElse(
-                id -> claims.put("roleId", id),
-                () -> claims.put("roleId", null)
+        roleName.ifPresentOrElse(
+                name -> claims.put("roleName", name),
+                () -> claims.put("roleName", null)
         );
 
         return Jwts.builder()

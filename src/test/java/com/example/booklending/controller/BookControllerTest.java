@@ -59,7 +59,7 @@ class BookControllerTest {
 
         mockMvc.perform(post("/api/books")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"title\":\"Test Book\",\"isbn\":\"1234567890\",\"status\":\"available\"}"))
+                        .content("{\"title\":\"Test Book\",\"isbn\":\"1234567890\",\"status\":\"AVAILABLE\"}"))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", "/api/books/1"))
                 .andExpect(jsonPath("$.title").value("Test Book"));
@@ -107,7 +107,6 @@ class BookControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-
     @Test
     void getAllBooks_ShouldReturnBooks() throws Exception {
         BookDto bookDto = new BookDto();
@@ -137,22 +136,25 @@ class BookControllerTest {
 
         mockMvc.perform(put("/api/books/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"title\":\"Updated Title\",\"isbn\":\"1234567890\",\"status\":\"checked out\"}"))
+                        .content("{\"title\":\"Updated Title\",\"isbn\":\"1234567890\",\"status\":\"BORROWED\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Updated Title"));
     }
 
     @Test
     void updateBook_ShouldReturnNotFoundStatus_WhenBookNotFound() throws Exception {
-        // Arrange: Mock the service to return an empty Optional for the given ID
         when(bookService.getBookById(anyLong())).thenReturn(Optional.empty());
 
-        // Act & Assert: Perform a PUT request and expect a 404 Not Found status
         mockMvc.perform(put("/api/books/999")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"title\":\"Nonexistent Title\",\"isbn\":\"0000000000\",\"status\":\"available\"}"))
+                        .content("{\"title\":\"Valid Title\","
+                                + "\"author\":\"Valid Author\","
+                                + "\"isbn\":\"1234567890123\","
+                                + "\"status\":\"AVAILABLE\","  // Match the enum value
+                                + "\"coverUrl\":\"https://example.com/cover.jpg\"}"))
                 .andExpect(status().isNotFound());
     }
+
 
     @Test
     void deleteBook_ShouldReturnNoContentStatus() throws Exception {
@@ -165,11 +167,84 @@ class BookControllerTest {
 
     @Test
     void deleteBook_ShouldReturnNotFoundStatus_WhenBookNotFound() throws Exception {
-        // Arrange: Mock the service to return an empty Optional for the given ID
         when(bookService.getBookById(anyLong())).thenReturn(Optional.empty());
 
-        // Act & Assert: Perform a DELETE request and expect a 404 Not Found status
         mockMvc.perform(delete("/api/books/999"))
                 .andExpect(status().isNotFound());
+    }
+
+    // New tests for the searchBooks method
+
+    @Test
+    void searchBooks_ShouldReturnBooksByTitle() throws Exception {
+        BookDto bookDto = new BookDto();
+        bookDto.setId(1L);
+        bookDto.setTitle("Searchable Title");
+
+        List<BookDto> books = Collections.singletonList(bookDto);
+
+        when(bookService.searchBooks(anyString())).thenReturn(books);
+
+        mockMvc.perform(get("/api/books/search")
+                        .param("query", "Searchable Title")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].title").value("Searchable Title"));
+    }
+
+    @Test
+    void searchBooks_ShouldReturnBooksByAuthor() throws Exception {
+        BookDto bookDto = new BookDto();
+        bookDto.setId(1L);
+        bookDto.setAuthor("Searchable Author");
+
+        List<BookDto> books = Collections.singletonList(bookDto);
+
+        when(bookService.searchBooks(anyString())).thenReturn(books);
+
+        mockMvc.perform(get("/api/books/search")
+                        .param("query", "Searchable Author")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].author").value("Searchable Author"));
+    }
+
+    @Test
+    void searchBooks_ShouldReturnBooksByIsbn() throws Exception {
+        BookDto bookDto = new BookDto();
+        bookDto.setId(1L);
+        bookDto.setIsbn("0987654321");
+
+        List<BookDto> books = Collections.singletonList(bookDto);
+
+        when(bookService.searchBooks(anyString())).thenReturn(books);
+
+        mockMvc.perform(get("/api/books/search")
+                        .param("query", "0987654321")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].isbn").value("0987654321"));
+    }
+
+    @Test
+    void searchBooks_ShouldReturnEmptyListWhenNoResults() throws Exception {
+        when(bookService.searchBooks(anyString())).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/api/books/search")
+                        .param("query", "Nonexistent Query")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().json("[]"));
+    }
+
+    @Test
+    void searchBooks_ShouldReturnEmptyListWhenQueryIsEmpty() throws Exception {
+        when(bookService.searchBooks(anyString())).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/api/books/search")
+                        .param("query", "")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().json("[]"));
     }
 }

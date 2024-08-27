@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +27,6 @@ public class AuthService {
         logger.info("Attempting to authenticate user: {}", username);
 
 
-
         try {
             // Authenticate the user
             Authentication authentication = authenticationManager.authenticate(
@@ -36,13 +36,13 @@ public class AuthService {
 
             logger.info("User authenticated successfully: {}", username);
 
-            Optional<Integer> roleId = authentication.getAuthorities().stream()
+            Optional<String> roleName = authentication.getAuthorities().stream()
                     .filter(authority -> authority instanceof RoleIdGrantedAuthority)  // Filter custom authority
-                    .map(authority -> ((RoleIdGrantedAuthority) authority).getRoleId()) // Extract roleId
+                    .map(GrantedAuthority::getAuthority) // Extract roleId
                     .findFirst();  // Return the first matching roleId
 
             // Generate and return JWT token
-            String token = jwtUtil.generateToken(username, roleId);
+            String token = jwtUtil.generateToken(username, roleName);
             logger.info("Generated JWT token for user: {}", username);
 
             return token;

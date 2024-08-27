@@ -27,11 +27,11 @@ export class AuthService {
     localStorage.removeItem('authToken');
   }
 
-  getRoleFromToken(): number | null {
+  getRoleNameFromToken(): string | null {
     const token = this.getToken();
     if (token) {
       const decodedPayload = this.decodeJwtPayload(token);
-      return decodedPayload?.roleId || null;
+      return decodedPayload?.roleName || null;
     }
     return null;
   }

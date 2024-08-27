@@ -27,6 +27,16 @@
       font-size: 1rem;
       border: 1px solid #ccc;
       border-radius: 4px;
+
+      &.ng-invalid.ng-touched {
+        border-color: red;
+      }
+    }
+
+    .error-message {
+      color: red;
+      margin-top: 0.5rem;
+      font-size: 0.875rem; /* Smaller font size for error messages */
     }
   }
 

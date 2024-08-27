@@ -9,7 +9,7 @@ import { FormsModule } from '@angular/forms';
 
 // Mock Router
 class MockRouter {
-  navigate(commands: any[]) {
+  navigate() {
     // Mock implementation of navigate
   }
 }
@@ -49,11 +49,11 @@ describe('LoginComponent', () => {
   it('should navigate to dashboard for role ID 1', () => {
     const spy = spyOn(router, 'navigate');
     const mockToken = 'mock.jwt.token';
-    const mockRole = 1; // Role ID as a number
+    const mockRoleName = 'ADMIN'; // Role name
 
     spyOn(authService, 'login').and.returnValue(of(mockToken));
     spyOn(authService, 'saveToken').and.callThrough();
-    spyOn(authService, 'getRoleFromToken').and.returnValue(mockRole);
+    spyOn(authService, 'getRoleNameFromToken').and.returnValue(mockRoleName);
 
     component.username = 'admin';
     component.password = 'password';
@@ -71,11 +71,11 @@ describe('LoginComponent', () => {
   it('should navigate to home for role ID 2', () => {
     const spy = spyOn(router, 'navigate');
     const mockToken = 'mock.jwt.token';
-    const mockRole = 2; // Role ID as a number
+    const mockRoleName = 'USER'; // Role ID as a number
 
     spyOn(authService, 'login').and.returnValue(of(mockToken));
     spyOn(authService, 'saveToken').and.callThrough();
-    spyOn(authService, 'getRoleFromToken').and.returnValue(mockRole);
+    spyOn(authService, 'getRoleNameFromToken').and.returnValue(mockRoleName);
 
     component.username = 'user';
     component.password = 'password';
@@ -96,7 +96,7 @@ describe('LoginComponent', () => {
 
     spyOn(authService, 'login').and.returnValue(of(mockToken));
     spyOn(authService, 'saveToken').and.callThrough();
-    spyOn(authService, 'getRoleFromToken').and.returnValue(null);
+    spyOn(authService, 'getRoleNameFromToken').and.returnValue(null);
 
     component.username = 'user';
     component.password = 'password';
@@ -114,11 +114,11 @@ describe('LoginComponent', () => {
   it('should navigate to login if role ID is unknown', () => {
     const spy = spyOn(router, 'navigate');
     const mockToken = 'mock.jwt.token';
-    const mockRole = 999; // Unknown role ID
+    const mockRoleName = "SUPERUSER"; // Unknown role ID
 
     spyOn(authService, 'login').and.returnValue(of(mockToken));
     spyOn(authService, 'saveToken').and.callThrough();
-    spyOn(authService, 'getRoleFromToken').and.returnValue(mockRole);
+    spyOn(authService, 'getRoleNameFromToken').and.returnValue(mockRoleName);
 
     component.username = 'user';
     component.password = 'password';

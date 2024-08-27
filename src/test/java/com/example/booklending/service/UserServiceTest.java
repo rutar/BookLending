@@ -2,6 +2,7 @@ package com.example.booklending.service;
 
 import com.example.booklending.dto.UserDto;
 import com.example.booklending.exceptions.ConflictException;
+import com.example.booklending.model.Role;
 import com.example.booklending.model.User;
 import com.example.booklending.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -46,7 +47,9 @@ class UserServiceTest {
         user.setUsername("testuser");
         user.setPassword("test123");
         user.setEmail("test@example.com");
-        user.setRoleId(1);
+        Role role = new Role();
+        role.setName("ADMIN");
+        user.setRole(role);
 
         userDto = new UserDto();
         userDto.setId(1L);

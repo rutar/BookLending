@@ -1,17 +1,16 @@
 package com.example.booklending.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "roles")
+@Setter
+@Getter
 public class Role {
 
     @Id
@@ -19,4 +18,8 @@ public class Role {
     private Integer id;
 
     private String name;
+
+    public Role(String name) {
+        this.name = name;
+    }
 }

@@ -21,7 +21,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/books")
-@CrossOrigin(origins = "http://localhost:4200")  // Allow Angular app's URL
 @Tag(name = "Books", description = "Endpoints for managing books")
 public class BookController {
 
@@ -84,7 +83,6 @@ public class BookController {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-
     @Operation(summary = "Get all books", description = "Fetches a list of all books.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of books retrieved successfully",
@@ -130,6 +128,24 @@ public class BookController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @Operation(summary = "Search for books", description = "Searches for books based on title, author, or ISBN.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Books found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = BookDto.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping("/search")
+    public ResponseEntity<List<BookDto>> searchBooks(
+            @Parameter(description = "Search query to match against title, author, and ISBN") @RequestParam String query) {
+        try {
+            List<BookDto> books = bookService.searchBooks(query);
+            return new ResponseEntity<>(books, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

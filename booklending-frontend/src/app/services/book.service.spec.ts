@@ -1,19 +1,19 @@
 import {TestBed} from '@angular/core/testing';
 import {HttpClientTestingModule, HttpTestingController} from '@angular/common/http/testing';
-import {Book, BooksService, CreateBook} from './books.service';
+import {BookDto, BookService, BookStatus, CreateBook} from './book.service';
 
 describe('BooksService', () => {
-  let service: BooksService;
+  let service: BookService;
   let httpMock: HttpTestingController;
   const baseUrl = 'http://localhost:8080/api/books';
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [BooksService]
+      providers: [BookService]
     });
 
-    service = TestBed.inject(BooksService);
+    service = TestBed.inject(BookService);
     httpMock = TestBed.inject(HttpTestingController);
   });
 
@@ -27,9 +27,23 @@ describe('BooksService', () => {
 
   describe('#getBooks', () => {
     it('should return an Observable<Book[]>', () => {
-      const dummyBooks: Book[] = [
-        { id: 1, title: 'Book 1', author: 'Author 1', isbn: '12345', status: 'available', coverUrl: 'http://example.com/cover1.jpg' },
-        { id: 2, title: 'Book 2', author: 'Author 2', isbn: '67890', status: 'lentout', coverUrl: 'http://example.com/cover2.jpg' }
+      const dummyBooks: BookDto[] = [
+        {
+          id: 1,
+          title: 'Book 1',
+          author: 'Author 1',
+          isbn: '12345',
+          status: BookStatus.AVAILABLE,
+          coverUrl: 'http://example.com/cover1.jpg'
+        },
+        {
+          id: 2,
+          title: 'Book 2',
+          author: 'Author 2',
+          isbn: '67890',
+          status: BookStatus.BORROWED,
+          coverUrl: 'http://example.com/cover2.jpg'
+        }
       ];
 
       service.getBooks().subscribe(books => {
@@ -45,7 +59,14 @@ describe('BooksService', () => {
 
   describe('#getBookById', () => {
     it('should return an Observable<Book>', () => {
-      const dummyBook: Book = { id: 1, title: 'Book 1', author: 'Author 1', isbn: '12345', status: 'available', coverUrl: 'http://example.com/cover1.jpg' };
+      const dummyBook: BookDto = {
+        id: 1,
+        title: 'Book 1',
+        author: 'Author 1',
+        isbn: '12345',
+        status: BookStatus.AVAILABLE,
+        coverUrl: 'http://example.com/cover1.jpg'
+      };
 
       service.getBookById(1).subscribe(book => {
         expect(book).toEqual(dummyBook);
@@ -59,8 +80,14 @@ describe('BooksService', () => {
 
   describe('#addBook', () => {
     it('should add a book and return the added book', () => {
-      const newBook: CreateBook = { title: 'New Book', author: 'New Author', coverUrl: 'http://example.com/newcover.jpg', isbn: '112233', status: 'available' };
-      const dummyBook: Book = { id: 1, ...newBook };
+      const newBook: CreateBook = {
+        title: 'New Book',
+        author: 'New Author',
+        coverUrl: 'http://example.com/newcover.jpg',
+        isbn: '112233',
+        status: BookStatus.AVAILABLE
+      };
+      const dummyBook: BookDto = {id: 1, ...newBook};
 
       service.addBook(newBook).subscribe(book => {
         expect(book).toEqual(dummyBook);
@@ -75,7 +102,14 @@ describe('BooksService', () => {
 
   describe('#updateBook', () => {
     it('should update a book and return the updated book', () => {
-      const updatedBook: Book = { id: 1, title: 'Updated Book', author: 'Updated Author', isbn: '12345', status: 'available', coverUrl: 'http://example.com/updatedcover.jpg' };
+      const updatedBook: BookDto = {
+        id: 1,
+        title: 'Updated Book',
+        author: 'Updated Author',
+        isbn: '12345',
+        status: BookStatus.AVAILABLE,
+        coverUrl: 'http://example.com/updatedcover.jpg'
+      };
 
       service.updateBook(updatedBook).subscribe(book => {
         expect(book).toEqual(updatedBook);
@@ -94,7 +128,7 @@ describe('BooksService', () => {
 
         next: (response) => {
           // Since `deleteBook` returns void, assert that no data is returned
-          expect(response).toEqual(Object({  }));
+          expect(response).toEqual(Object({}));
         },
         error: (err) => fail('Expected no error but got one: ' + err)
       });

@@ -25,7 +25,7 @@
           <span
             [ngClass]="{
               'available': book.status === 'available',
-              'lentout': book.status === 'lentout',
+              'borrowed': book.status === 'borrowed',
               'reserved': book.status === 'reserved'
             }">
             {{ book.status | titlecase }}
@@ -40,8 +40,8 @@
             Cancel Reservation
           </button>
           <button
-            *ngIf="book.status === 'lentout'"
-            (click)="onMarkReturned(book)"
+            *ngIf="book.status === 'borrowed'"
+            (click)="onMarkAsReturned(book)"
             class="return-btn">
             Mark as Returned
           </button>

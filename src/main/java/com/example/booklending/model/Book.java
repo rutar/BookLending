@@ -1,17 +1,17 @@
 package com.example.booklending.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "books")
 @Setter
 @Getter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Book {
 
     @Id
@@ -21,8 +21,13 @@ public class Book {
     private String title;
     private String author;
     private String isbn;
-    private String status; // Book status (available, lent_out, reserved)
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private BookStatus status; // Book status (AVAILABLE, BORROWED, RESERVED)
+
     private String coverUrl; // Store image URL
+
 }
 
 

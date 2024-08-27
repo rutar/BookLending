@@ -79,12 +79,12 @@ describe('AuthService', () => {
       const decodedPayload = {roleId: 12345};
       spyOn(service as any, 'decodeJwtPayload').and.returnValue(decodedPayload);
       service.saveToken(token);
-      expect(service.getRoleFromToken()).toBe(12345);
+      expect(service.getRoleNameFromToken()).toBe('12345');
     });
 
     it('should return null if the token is invalid', () => {
       spyOn(service as any, 'decodeJwtPayload').and.returnValue(null);
-      expect(service.getRoleFromToken()).toBeNull();
+      expect(service.getRoleNameFromToken()).toBeNull();
     });
   });
 

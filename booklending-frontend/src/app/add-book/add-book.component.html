@@ -5,30 +5,37 @@
     <div class="form-group">
       <label for="title">Title:</label>
       <input id="title" formControlName="title" type="text" placeholder="Enter book title">
+      <div *ngIf="title?.invalid && (title?.dirty || title?.touched)" class="error-message">
+        <small *ngIf="title?.errors?.['required']">Title is required.</small>
+        <small *ngIf="title?.errors?.['minlength']">Title must be at least 3 characters long.</small>
+      </div>
     </div>
 
     <div class="form-group">
       <label for="author">Author:</label>
       <input id="author" formControlName="author" type="text" placeholder="Enter book author">
+      <div *ngIf="author?.invalid && (author?.dirty || author?.touched)" class="error-message">
+        <small *ngIf="author?.errors?.['required']">Author is required.</small>
+        <small *ngIf="author?.errors?.['minlength']">Author must be at least 3 characters long.</small>
+      </div>
     </div>
 
     <div class="form-group">
       <label for="isbn">ISBN:</label>
       <input id="isbn" formControlName="isbn" type="text" placeholder="Enter book ISBN">
+      <div *ngIf="isbn?.invalid && (isbn?.dirty || isbn?.touched)" class="error-message">
+        <small *ngIf="isbn?.errors?.['required']">ISBN is required.</small>
+        <small *ngIf="isbn?.errors?.['pattern']">Invalid ISBN format. Enter a valid ISBN-10 or ISBN-13.</small>
+      </div>
     </div>
 
     <div class="form-group">
       <label for="coverUrl">Cover URL:</label>
       <input id="coverUrl" formControlName="coverUrl" type="text" placeholder="Enter cover image URL">
-    </div>
-
-    <div class="form-group">
-      <label for="status">Status:</label>
-      <select id="status" formControlName="status">
-        <option value="available">Available</option>
-        <option value="lentout">Lent Out</option>
-        <option value="reserved">Reserved</option>
-      </select>
+      <div *ngIf="coverUrl?.invalid && (coverUrl?.dirty || coverUrl?.touched)" class="error-message">
+        <small *ngIf="coverUrl?.errors?.['required']">Cover URL is required.</small>
+        <small *ngIf="coverUrl?.errors?.['pattern']">Invalid URL format. Enter a valid image URL.</small>
+      </div>
     </div>
 
     <button type="submit" class="submit-btn" [disabled]="addBookForm.invalid">Add Book</button>

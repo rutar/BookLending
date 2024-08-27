@@ -7,18 +7,16 @@ import com.example.booklending.exceptions.UserAlreadyExistsException;
 import com.example.booklending.model.User;
 import com.example.booklending.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Arrays;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -141,10 +139,11 @@ public class UserService implements UserDetailsService {
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
-                List.of(new RoleIdGrantedAuthority(user.getRoleId())));
+                List.of(new RoleIdGrantedAuthority(user.getRole().getName())));
     }
 
     private Optional<UserDto> dtoFromEntity(User user) {
+
         log.debug("Mapping user entity to DTO for user ID: {}", user.getId());
         return Optional.of(modelMapper.map(user, UserDto.class));
     }

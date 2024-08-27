@@ -2,13 +2,13 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {FormBuilder, ReactiveFormsModule} from '@angular/forms';
 import {of, throwError} from 'rxjs';
 import {AddBookComponent} from './add-book.component';
-import {Book, BooksService} from '../services/books.service';
+import {BookDto, BookService} from '../services/book.service';
 import {NotificationService} from '../services/notification.service';
 
 describe('AddBookComponent', () => {
   let component: AddBookComponent;
   let fixture: ComponentFixture<AddBookComponent>;
-  let booksService: jasmine.SpyObj<BooksService>;
+  let booksService: jasmine.SpyObj<BookService>;
   let notificationService: jasmine.SpyObj<NotificationService>;
 
   beforeEach(async () => {
@@ -19,7 +19,7 @@ describe('AddBookComponent', () => {
       imports: [ReactiveFormsModule, AddBookComponent],
       providers: [
         FormBuilder,
-        { provide: BooksService, useValue: booksServiceSpy },
+        { provide: BookService, useValue: booksServiceSpy },
         { provide: NotificationService, useValue: notificationServiceSpy }
       ]
     })
@@ -27,11 +27,11 @@ describe('AddBookComponent', () => {
 
     fixture = TestBed.createComponent(AddBookComponent);
     component = fixture.componentInstance;
-    booksService = TestBed.inject(BooksService) as jasmine.SpyObj<BooksService>;
+    booksService = TestBed.inject(BookService) as jasmine.SpyObj<BookService>;
     notificationService = TestBed.inject(NotificationService) as jasmine.SpyObj<NotificationService>;
 
     // Define a mock Book object
-    const mockBook: Book = {
+    const mockBook: BookDto = {
       id: 1,  // Mock ID
       title: 'New Book',
       author: 'Author Name',
@@ -59,7 +59,7 @@ describe('AddBookComponent', () => {
     });
   });
 
-  it('should call addBook on BooksService when form is valid and submitted', () => {
+  it('should call addBook on BookService when form is valid and submitted', () => {
     component.addBookForm.setValue({
       title: 'New Book',
       author: 'Author Name',

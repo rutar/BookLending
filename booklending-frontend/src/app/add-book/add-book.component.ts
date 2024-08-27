@@ -1,36 +1,46 @@
 import {Component, EventEmitter, Output} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {Book, BooksService} from '../services/books.service';
+import {BookDto, BookService} from '../services/book.service';
 import {NotificationService} from '../services/notification.service';
+import {CommonModule} from '@angular/common';
 
 @Component({
   selector: 'app-add-book',
   standalone: true,
   templateUrl: './add-book.component.html',
   styleUrls: ['./add-book.component.scss'],
-  imports: [ReactiveFormsModule]
+  imports: [CommonModule, ReactiveFormsModule]
 })
 export class AddBookComponent {
   addBookForm: FormGroup;
 
   @Output() bookAdded = new EventEmitter<void>();
 
-  constructor(private fb: FormBuilder, private booksService: BooksService, private notificationService: NotificationService) {
+  constructor(
+    private fb: FormBuilder,
+    private booksService: BookService,
+    private notificationService: NotificationService
+  ) {
+    // Initialize the form with validators
     this.addBookForm = this.fb.group({
-      title: ['', Validators.required],
-      author: ['', Validators.required],
-      coverUrl: ['', Validators.required],
-      isbn: ['', Validators.required],
+      title: ['', [Validators.required, Validators.minLength(1)]],
+      author: ['', [Validators.required, Validators.minLength(1)]],
+      coverUrl: ['', [Validators.required, Validators.pattern('^(https?:\\/\\/)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(\\/\\S*)?$')]],
+      isbn: ['', [Validators.required, Validators.pattern('^(?:\\d{9}X|\\d{10}|(978|979)\\d{10})$')]],
       status: ['available', Validators.required]
     });
   }
 
+  // Method called when the form is submitted
   onSubmit() {
+    // Check if the form is valid
     if (this.addBookForm.valid) {
-      const newBook: Omit<Book, 'id'> = this.addBookForm.value; // Exclude `id` from new book submission
+      const newBook: Omit<BookDto, 'id'> = this.addBookForm.value; // Exclude `id` from new book submission
       this.booksService.addBook(newBook).subscribe({
         next: (book) => {
+          // Show success notification
           this.notificationService.openDialog('Book added successfully!', false);
+          // Reset the form to its initial state
           this.addBookForm.reset({
             title: '',
             author: '',
@@ -38,14 +48,34 @@ export class AddBookComponent {
             isbn: '',
             status: 'available'
           });
+          // Emit event to notify that a book was added
           this.bookAdded.emit();
         },
         error: (err) => {
+          // Show failure notification
           this.notificationService.openDialog('Failed to add book. Please try again.', true);
         }
       });
     } else {
+      // Show validation error notification
       this.notificationService.openDialog('Please fill out all fields correctly.', true);
     }
+  }
+
+  // Getters for each form control to simplify access in the template
+  get title() {
+    return this.addBookForm.get('title');
+  }
+
+  get author() {
+    return this.addBookForm.get('author');
+  }
+
+  get isbn() {
+    return this.addBookForm.get('isbn');
+  }
+
+  get coverUrl() {
+    return this.addBookForm.get('coverUrl');
   }
 }

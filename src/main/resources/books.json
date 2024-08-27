@@ -3,175 +3,175 @@
         "title": "Yahoo! Hacks",
         "author": "Paul Bausch",
         "isbn": "9780596009458",
-        "status": "available",
+        "status": "RESERVED",
         "coverUrl": "http://books.google.com/books/content?id=xZdOEvXGvucC&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
     },
     {
         "title": "Google Hacks",
         "author": "Rael Dornfest, Paul Bausch, Tara Calishain",
         "isbn": "9780596553708",
-        "status": "available",
+        "status": "RESERVED",
         "coverUrl": "http://books.google.com/books/content?id=A9GzMnKHMZcC&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
     },
     {
         "title": "Spidering Hacks",
         "author": "Kevin Hemenway, Tara Calishain",
         "isbn": "9780596005771",
-        "status": "available",
+        "status": "RESERVED",
         "coverUrl": "http://books.google.com/books/content?id=2tKx79ahktoC&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
     },
     {
         "title": "Oracle PL/SQL Programming",
         "author": "Steven Feuerstein, Bill Pribyl",
         "isbn": "9781449324438",
-        "status": "available",
+        "status": "BORROWED",
         "coverUrl": "http://books.google.com/books/content?id=Cr6nAgAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
     },
     {
         "title": "Syntax of Hungarian",
         "author": "G\u00e1bor Alberti, Tibor Laczk\u00f3",
         "isbn": "9789048532742",
-        "status": "available",
+        "status": "BORROWED",
         "coverUrl": "http://books.google.com/books/content?id=beRIDwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
     },
     {
         "title": "Jaba sukuriputo purogurama no tame no webu dezain nyumon",
         "author": "\u845b\u897f\u79cb\u96c4, \u559c\u5b89\u4eae\u4ecb",
         "isbn": "9784798027265",
-        "status": "available",
+        "status": "AVAILABLE",
         "coverUrl": "http://books.google.com/books/content?id=kKkxUzGeE7QC&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
     },
     {
         "title": "Elasticsearch: The Definitive Guide",
         "author": "Clinton Gormley, Zachary Tong",
         "isbn": "9781449358525",
-        "status": "available",
+        "status": "AVAILABLE",
         "coverUrl": "http://books.google.com/books/content?id=d19aBgAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
     },
     {
         "title": "Google Hacks\u7b2c3\u7248",
         "author": "Unknown Author",
         "isbn": "9784873113210",
-        "status": "available",
+        "status": "BORROWED",
         "coverUrl": "http://books.google.com/books/content?id=0DP9wZDnrsEC&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
     },
     {
         "title": "The Public School Journal",
         "author": "Unknown Author",
-        "isbn": "Not Available",
-        "status": "available",
+        "isbn": "Not AVAILABLE",
+        "status": "AVAILABLE",
         "coverUrl": "http://books.google.com/books/content?id=cVUwAQAAMAAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
     },
     {
         "title": "Ron Paul and His Revolution",
         "author": "George Dance",
         "isbn": "9781105026478",
-        "status": "available",
+        "status": "AVAILABLE",
         "coverUrl": "http://books.google.com/books/content?id=vhZeAwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
     },
     {
         "title": "Modern Approaches in Applied Intelligence",
         "author": "Kishan G. Mehrotra, Chilukuri Krishna Mohan, Jae C. Oh, Pramod K. Varshney, Moonis Ali",
         "isbn": "9783642218279",
-        "status": "available",
+        "status": "BORROWED",
         "coverUrl": "http://books.google.com/books/content?id=zbmqCAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
     },
     {
         "title": "jQuery\u306b\u3088\u308bWeb\u30b5\u30fc\u30d3\u30b9\u6d3b\u7528\u30ef\u30b6\u5b9f\u8df5\u30b5\u30f3\u30d7\u30eb\u96c6",
         "author": "\u845b\u897f\u79cb\u96c4",
         "isbn": "9784798026312",
-        "status": "available",
+        "status": "RESERVED",
         "coverUrl": "http://books.google.com/books/content?id=1tJJagWlt4EC&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
     },
     {
         "title": "The Digital Marketer",
         "author": "Larry Weber, Lisa Leslie Henderson",
         "isbn": "9781118760819",
-        "status": "available",
+        "status": "AVAILABLE",
         "coverUrl": "http://books.google.com/books/content?id=mYtgAwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
     },
     {
         "title": "Oracle PL/SQL for DBAs",
         "author": "Arup Nanda, Steven Feuerstein",
         "isbn": "9780596005870",
-        "status": "available",
+        "status": "AVAILABLE",
         "coverUrl": "http://books.google.com/books/content?id=fqibAgAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
     },
     {
         "title": "Picture Research",
         "author": "Nina Lager Vestberg",
         "isbn": "9780262362221",
-        "status": "available",
+        "status": "AVAILABLE",
         "coverUrl": "http://books.google.com/books/content?id=8Z2HEAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
     },
     {
         "title": "Social Reading",
         "author": "Jos\u00e9-Antonio Cord\u00f3n-Garc\u00eda, Julio Alonso-Ar\u00e9valo, Raquel G\u00f3mez-D\u00edaz, Daniel Linder",
         "isbn": "9781780633923",
-        "status": "available",
+        "status": "AVAILABLE",
         "coverUrl": "http://books.google.com/books/content?id=42VEAgAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
     },
     {
         "title": "Introduction to Cyber-Warfare",
         "author": "Paulo Shakarian, Jana Shakarian, Andrew Ruef",
         "isbn": "9780124079267",
-        "status": "available",
+        "status": "AVAILABLE",
         "coverUrl": "http://books.google.com/books/content?id=ziq8LPWfgkIC&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
     },
     {
         "title": "International Schools, Teaching and Governance",
         "author": "Carmen Blyth",
         "isbn": "9783319467832",
-        "status": "available",
+        "status": "AVAILABLE",
         "coverUrl": "http://books.google.com/books/content?id=Gp47DgAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
     },
     {
         "title": "Updating to Remain the Same",
         "author": "Wendy Hui Kyong Chun",
         "isbn": "9780262333788",
-        "status": "available",
+        "status": "AVAILABLE",
         "coverUrl": "http://books.google.com/books/content?id=9bFIDAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
     },
     {
         "title": "Interactivity in E-Learning: Case Studies and Frameworks",
         "author": "Wang, Haomin",
         "isbn": "9781613504420",
-        "status": "available",
+        "status": "AVAILABLE",
         "coverUrl": "http://books.google.com/books/content?id=kq1U5eXrJccC&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
     },
     {
         "title": "La N\u00e9gritude",
         "author": "Dr Wacyf H Ghali",
         "isbn": "9781663264268",
-        "status": "available",
+        "status": "AVAILABLE",
         "coverUrl": "http://books.google.com/books/content?id=klQZEQAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
     },
     {
         "title": "Real World Java Ee Night Hacks Dissecting the Business Tier",
         "author": "Adam Bien",
         "isbn": "9781447672319",
-        "status": "available",
+        "status": "AVAILABLE",
         "coverUrl": "http://books.google.com/books/content?id=a3oqAwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
     },
     {
         "title": "Global Health and Sustainable Development Architecture",
         "author": "Mei-Ling Wang",
         "isbn": "9780761847533",
-        "status": "available",
+        "status": "BORROWED",
         "coverUrl": "http://books.google.com/books/content?id=0fAyTLbJPk8C&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
     },
     {
         "title": "Pharmaceuticals, Corporate Crime and Public Health",
         "author": "Graham Dukes, John Braithwaite, J P Moloney",
         "isbn": "9781783471102",
-        "status": "available",
+        "status": "AVAILABLE",
         "coverUrl": "http://books.google.com/books/content?id=Sf72AwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
     },
     {
         "title": "Oracle PL/SQL cheng shi she ji",
         "author": "Unknown Author",
         "isbn": "9789867794253",
-        "status": "available",
+        "status": "BORROWED",
         "coverUrl": "http://books.google.com/books/content?id=FyRYEqHk-4UC&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
     }
 ]

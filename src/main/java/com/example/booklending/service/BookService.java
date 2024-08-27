@@ -109,4 +109,27 @@ public class BookService {
                 })
                 .collect(Collectors.toList());
     }
+
+    /**
+     * Searches for books by title, author, or ISBN.
+     * <p>
+     * This method delegates to the {@link BookRepository#searchByTitleOrAuthorOrIsbn(String)}
+     * method to find books that match the search query in the title, author, or ISBN fields.
+     * The query is case-insensitive.
+     * </p>
+     *
+     * @param query the search query to match against the title, author, and ISBN fields.
+     *              The search is case-insensitive and matches any part of the fields.
+     * @return a list of {@link BookDto} objects that match the search criteria.
+     */
+    public List<BookDto> searchBooks(String query) {
+        if (query == null || query.trim().isEmpty()) {
+            return List.of();
+        }
+        String cleanedQuery = query.trim().toLowerCase();
+        List<Book> books = bookRepository.searchByTitleOrAuthorOrIsbn(cleanedQuery);
+        return books.stream()
+                .map(book -> modelMapper.map(book, BookDto.class))
+                .collect(Collectors.toList());
+    }
 }

@@ -3,6 +3,7 @@ package com.example.booklending.service;
 import com.example.booklending.dto.BookDto;
 import com.example.booklending.exceptions.ConflictException;
 import com.example.booklending.model.Book;
+import com.example.booklending.model.BookStatus;
 import com.example.booklending.repository.BookRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,13 +46,13 @@ class BookServiceTest {
         book.setId(1L);
         book.setTitle("Test Book");
         book.setIsbn("1234567890");
-        book.setStatus("available");
+        book.setStatus(BookStatus.AVAILABLE);
 
         bookDto = new BookDto();
         bookDto.setId(1L);
         bookDto.setTitle("Test Book");
         bookDto.setIsbn("1234567890");
-        bookDto.setStatus("available");
+        bookDto.setStatus(BookStatus.AVAILABLE);
     }
 
     @Test
@@ -118,8 +120,8 @@ class BookServiceTest {
 
     @Test
     void updateBook_shouldReturnEmptyOptionalWhenUpdateFails() {
-     //   when(modelMapper.map(bookDto, Book.class)).thenReturn(book);
-     //   when(bookRepository.save(any(Book.class))).thenReturn(null);  // Simulating a failure in save
+        //   when(modelMapper.map(bookDto, Book.class)).thenReturn(book);
+        //   when(bookRepository.save(any(Book.class))).thenReturn(null);  // Simulating a failure in save
 
         Optional<BookDto> result = bookService.updateBook(1L, bookDto);
 
@@ -174,5 +176,67 @@ class BookServiceTest {
         Optional<BookDto> result = bookService.getBookByIsbn("1234567890");
 
         assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testSearchBooksByTitle() {
+        String query = "Effective";
+        Book book = new Book(1L, "Effective Java", "Joshua Bloch", "978-0134685991", BookStatus.AVAILABLE, "cover_url");
+        BookDto bookDto = new BookDto(1L, "Effective Java", "Joshua Bloch", "978-0134685991", BookStatus.AVAILABLE, "cover_url");
+
+        when(bookRepository.searchByTitleOrAuthorOrIsbn(query.trim().toLowerCase())).thenReturn(List.of(book));
+        when(modelMapper.map(book, BookDto.class)).thenReturn(bookDto);
+
+        List<BookDto> result = bookService.searchBooks(query);
+
+        assertEquals(1, result.size());
+        assertEquals(bookDto, result.get(0));
+    }
+
+    @Test
+    void testSearchBooksByAuthor() {
+        String query = "Robert";
+        Book book = new Book(2L, "Clean Code", "Robert C. Martin", "978-0132350884", BookStatus.AVAILABLE, "cover_url");
+        BookDto bookDto = new BookDto(2L, "Clean Code", "Robert C. Martin", "978-0132350884", BookStatus.AVAILABLE, "cover_url");
+
+        when(bookRepository.searchByTitleOrAuthorOrIsbn(query.trim().toLowerCase())).thenReturn(List.of(book));
+        when(modelMapper.map(book, BookDto.class)).thenReturn(bookDto);
+
+        List<BookDto> result = bookService.searchBooks(query);
+
+        assertEquals(1, result.size());
+        assertEquals(bookDto, result.get(0));
+    }
+
+    @Test
+    void testSearchBooksByIsbn() {
+        String query = "978-0134685991";
+        Book book = new Book(1L, "Effective Java", "Joshua Bloch", "978-0134685991", BookStatus.AVAILABLE, "cover_url");
+        BookDto bookDto = new BookDto(1L, "Effective Java", "Joshua Bloch", "978-0134685991", BookStatus.AVAILABLE, "cover_url");
+
+        when(bookRepository.searchByTitleOrAuthorOrIsbn(query)).thenReturn(List.of(book));
+        when(modelMapper.map(book, BookDto.class)).thenReturn(bookDto);
+
+        List<BookDto> result = bookService.searchBooks(query);
+
+        assertEquals(1, result.size());
+        assertEquals(bookDto, result.get(0));
+    }
+
+    @Test
+    void testSearchBooksEmptyQuery() {
+        List<BookDto> result = bookService.searchBooks("");
+
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    void testSearchBooksNoResults() {
+        String query = "Nonexistent";
+        when(bookRepository.searchByTitleOrAuthorOrIsbn(query.trim().toLowerCase())).thenReturn(Collections.emptyList());
+
+        List<BookDto> result = bookService.searchBooks(query);
+
+        assertEquals(0, result.size());
     }
 }

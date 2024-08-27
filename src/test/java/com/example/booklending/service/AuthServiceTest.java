@@ -1,13 +1,9 @@
 package com.example.booklending.service;
 
-import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
-
 import com.example.booklending.configuration.JwtUtil;
 import com.example.booklending.configuration.RoleIdGrantedAuthority;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -21,6 +17,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
 class AuthServiceTest {
 
@@ -46,11 +46,11 @@ class AuthServiceTest {
         // Arrange
         String username = "user1";
         String password = "password1";
-        Integer roleId = 1;
+        String roleName = "anmin";
         String expectedToken = "jwt-token";
 
         // Create the granted authority
-        RoleIdGrantedAuthority grantedAuthority = new RoleIdGrantedAuthority(roleId);
+        RoleIdGrantedAuthority grantedAuthority = new RoleIdGrantedAuthority(roleName);
 
         // Mock the return type
         Collection<GrantedAuthority> authorities = Collections.singletonList(grantedAuthority);
@@ -59,7 +59,7 @@ class AuthServiceTest {
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(authentication);
         when(authentication.getAuthorities()).thenReturn((Collection)authorities);
-        when(jwtUtil.generateToken(username, Optional.of(roleId))).thenReturn(expectedToken);
+        when(jwtUtil.generateToken(username, Optional.of(roleName))).thenReturn(expectedToken);
 
         // Mock SecurityContextHolder
         SecurityContext securityContext = mock(SecurityContext.class);
@@ -71,7 +71,7 @@ class AuthServiceTest {
         // Assert
         assertEquals(expectedToken, token);
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
-        verify(jwtUtil).generateToken(username, Optional.of(roleId));
+        verify(jwtUtil).generateToken(username, Optional.of(roleName));
     }
 
     @Test

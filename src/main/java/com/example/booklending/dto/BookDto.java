@@ -1,5 +1,6 @@
 package com.example.booklending.dto;
 
+import com.example.booklending.model.BookStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
@@ -34,7 +35,7 @@ public class BookDto {
     private String isbn;
 
     @Schema(description = "Status of the book (available, lent_out, reserved)", example = "available")
-    private String status;
+    private BookStatus status;
 
     @Schema(description = "URL of the cover image of the book", example = "https://example.com/cover.jpg")
     private String coverUrl;

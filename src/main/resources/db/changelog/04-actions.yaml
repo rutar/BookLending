@@ -4,7 +4,7 @@ databaseChangeLog:
       author: dbadmin
       changes:
         - createTable:
-            tableName: reservations
+            tableName: actions
             columns:
               - column:
                   name: id
@@ -22,27 +22,30 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: status
+                  name: action
                   type: VARCHAR(50)
                   constraints:
                     nullable: false
               - column:
-                  name: reserved_at
+                  name: action_date
                   type: TIMESTAMP
                   constraints:
                     nullable: false
                   defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: due_date
+                  type: TIMESTAMP
         - addForeignKeyConstraint:
-            baseTableName: reservations
+            baseTableName: actions
             baseColumnNames: book_id
             referencedTableName: books
             referencedColumnNames: id
-            constraintName: fk_reservations_books
+            constraintName: fk_actions_books
             onDelete: CASCADE
         - addForeignKeyConstraint:
-            baseTableName: reservations
+            baseTableName: actions
             baseColumnNames: user_id
             referencedTableName: users
             referencedColumnNames: id
-            constraintName: fk_reservations_users
+            constraintName: fk_actions_users
             onDelete: CASCADE
