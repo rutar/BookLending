@@ -36,6 +36,12 @@ export class AuthService {
     return null;
   }
 
+  isTokenExpired(token: string): boolean {
+    const decodedPayload = this.decodeJwtPayload(token);
+    const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+    return decodedPayload?.exp < currentTime;
+  }
+
   private decodeJwtPayload(token: string): any {
     try {
       const base64Url = token.split('.')[1];  // Extract the payload part of the JWT

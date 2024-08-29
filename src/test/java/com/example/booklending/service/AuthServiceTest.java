@@ -46,7 +46,7 @@ class AuthServiceTest {
         // Arrange
         String username = "user1";
         String password = "password1";
-        String roleName = "anmin";
+            String roleName = "admin";
         String expectedToken = "jwt-token";
 
         // Create the granted authority
