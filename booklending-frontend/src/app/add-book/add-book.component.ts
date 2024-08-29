@@ -78,4 +78,5 @@ export class AddBookComponent {
   get coverUrl() {
     return this.addBookForm.get('coverUrl');
   }
+
 }

@@ -29,6 +29,7 @@
       </div>
     </div>
 
+
     <div class="form-group">
       <label for="coverUrl">Cover URL:</label>
       <input id="coverUrl" formControlName="coverUrl" type="text" placeholder="Enter cover image URL">
@@ -36,6 +37,12 @@
         <small *ngIf="coverUrl?.errors?.['required']">Cover URL is required.</small>
         <small *ngIf="coverUrl?.errors?.['pattern']">Invalid URL format. Enter a valid image URL.</small>
       </div>
+    </div>
+
+
+    <!-- Превью обложки -->
+    <div>
+      <img [src]="coverUrl?.value" alt="Book Cover" class="book-cover-preview">
     </div>
 
     <button type="submit" class="submit-btn" [disabled]="addBookForm.invalid">Add Book</button>

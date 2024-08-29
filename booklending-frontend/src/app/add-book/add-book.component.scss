@@ -40,6 +40,14 @@
     }
   }
 
+  .book-cover-preview {
+    width: 200px;
+    height: auto;
+    margin-top: 10px;
+    border: 1px solid #ccc;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+  }
+
   .submit-btn {
     display: block;
     width: 100%;
