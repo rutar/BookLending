@@ -40,10 +40,10 @@ public class ActionController {
     })
     @PostMapping("/reserve_book")
     public ResponseEntity<ActionDto> reserveBook(
-            @Parameter(description = "User ID making the reservation") @RequestParam Long userId,
+            @Parameter(description = "User name making the reservation") @RequestParam String userName,
             @Parameter(description = "Book ID to be reserved") @RequestParam Long bookId) {
         try {
-            ActionDto action = actionService.reserveBook(userId, bookId);
+            ActionDto action = actionService.reserveBook(userName, bookId);
             return new ResponseEntity<>(action, HttpStatus.CREATED);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -61,10 +61,10 @@ public class ActionController {
     })
     @PostMapping("/cancel_reservation")
     public ResponseEntity<ActionDto> cancelReservation(
-            @Parameter(description = "User ID making the cancellation") @RequestParam Long userId,
+            @Parameter(description = "User name making the cancellation") @RequestParam String userName,
             @Parameter(description = "Book ID to cancel reservation") @RequestParam Long bookId) {
         try {
-            ActionDto Action = actionService.cancelReservation(userId, bookId);
+            ActionDto Action = actionService.cancelReservation(userName, bookId);
             return new ResponseEntity<>(Action, HttpStatus.OK);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -82,10 +82,31 @@ public class ActionController {
     })
     @PostMapping("/mark_received")
     public ResponseEntity<ActionDto> markAsReceived(
-            @Parameter(description = "User ID receiving the book") @RequestParam Long userId,
+            @Parameter(description = "User name receiving the book") @RequestParam String userName,
             @Parameter(description = "Book ID being received") @RequestParam Long bookId) {
         try {
-            ActionDto Action = actionService.markAsReceived(userId, bookId);
+            ActionDto Action = actionService.markAsReceived(userName, bookId);
+            return new ResponseEntity<>(Action, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Operation(summary = "Mark book as lent out", description = "Allows a library admin to mark a reserved book as lent out.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Book marked as lent out successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Action.class))),
+            @ApiResponse(responseCode = "404", description = "Reservation not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PostMapping("/mark_lentout")
+    public ResponseEntity<ActionDto> markAsLentOut(
+            @Parameter(description = "Library admin name lending the book") @RequestParam String userName,
+            @Parameter(description = "Book ID being lent out") @RequestParam Long bookId) {
+        try {
+            ActionDto Action = actionService.markAsLentOut(userName, bookId);
             return new ResponseEntity<>(Action, HttpStatus.OK);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -103,10 +124,11 @@ public class ActionController {
     })
     @PostMapping("/mark_returned")
     public ResponseEntity<ActionDto> markAsReturned(
-            @Parameter(description = "User ID returning the book") @RequestParam Long userId,
+            @Parameter(description = "User name returning the book") @RequestParam String userName,
             @Parameter(description = "Book ID being returned") @RequestParam Long bookId) {
         try {
-            ActionDto Action = actionService.markAsReturned(userId, bookId);
+
+            ActionDto Action = actionService.markAsReturned(userName, bookId);
             return new ResponseEntity<>(Action, HttpStatus.OK);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

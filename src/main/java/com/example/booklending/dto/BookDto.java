@@ -39,4 +39,5 @@ public class BookDto {
 
     @Schema(description = "URL of the cover image of the book", example = "https://example.com/cover.jpg")
     private String coverUrl;
+
 }

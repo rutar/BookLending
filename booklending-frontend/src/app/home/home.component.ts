@@ -1,84 +1,85 @@
-import { Component, OnInit } from '@angular/core';
-import { BookService } from '../services/book.service';
-import { BookDto } from '../services/book.service';
+import {CommonModule, NgForOf} from "@angular/common";
+import {FormsModule} from "@angular/forms";
+import {Component} from '@angular/core';
+import {NotificationService} from '../services/notification.service';
+import {BookDto, BookService, BookStatus} from "../services/book.service";
+import {AuthService} from '../services/auth.service';
 
 @Component({
-  selector: 'app-home',
+  selector: 'app-book-borrowing',
   templateUrl: './home.component.html',
   standalone: true,
+  imports: [
+    NgForOf,
+    FormsModule,
+    CommonModule
+  ],
   styleUrls: ['./home.component.scss']
 })
-export class HomeComponent implements OnInit {
+
+export class HomeComponent {
+  searchQuery: string = '';
   books: BookDto[] = [];
-  selectedBook: BookDto | null = null;
-  private errorMessage: string | undefined;
+  filteredBooks: BookDto[] = [];
 
-  constructor(private bookService: BookService) { }
-
-  ngOnInit(): void {
-    // Load books on component initialization
+  constructor(private authService: AuthService, private bookService: BookService, private notificationService: NotificationService) {
     this.loadBooks();
   }
 
-  loadBooks(): void {
-    this.bookService.getBooks().subscribe({
-      next: (books: BookDto[]) => {
-        this.books = books;
-        this.errorMessage = ''; // Clear any previous error messages
+  ngOnInit(): void {
+    this.loadBooks();
+  }
+
+  loadBooks() {
+    this.bookService.getBooks().subscribe(data => {
+      this.books = data;
+      this.filteredBooks = this.books;
+    });
+  }
+
+  onSearch() {
+    this.filteredBooks = this.books.filter(book =>
+      book.title.toLowerCase().includes(this.searchQuery.toLowerCase())
+    );
+  }
+
+  reserveBook(bookId: number) {
+    this.bookService.reserveBook(this.authService.getUsername(), bookId).subscribe(() => {
+      this.notificationService.openDialog("Book reserved successfully!", false);
+      this.loadBooks();
+    });
+  }
+
+  cancelReservation(bookId: number) {
+    this.bookService.cancelReservation(this.authService.getUsername(), bookId).subscribe({
+      next: () => {
+        this.notificationService.openDialog("Reservation cancelled successfully!", false);
+        this.loadBooks();
       },
-      error: (err: any) => {
-        console.error('Error loading books', err);
-        this.errorMessage = 'Failed to load books. Please try again later.';
-        this.books = []; // Clear books on error
+      error: (err) => {
+        if (err.status === 404) {
+          this.notificationService.openDialog("Reservation not found. It may have already been cancelled.", true);
+        } else {
+          this.notificationService.openDialog("An error occurred. Please try again later.", true);
+        }
       }
     });
   }
 
-  onSearch(query: string): void {
-    // Check if the query is not empty or whitespace
-    if (!query.trim()) {
-      this.books = []; // Clear books if the query is invalid
-      this.errorMessage = 'Please enter a valid search query.';
-      return;
-    }
 
-    this.bookService.searchBooks(query).subscribe({
-      next: (books: BookDto[]) => {
-        this.books = books;
-        this.errorMessage = ''; // Clear any previous error messages
-      },
-      error: (err: any) => {
-        console.error('Error searching books', err);
-        this.errorMessage = 'There was an error retrieving search results. Please try again.';
-        this.books = []; // Clear books on error
-      }
+  markAsReceived(bookId: number) {
+    this.bookService.markAsReceived(this.authService.getUsername(), bookId).subscribe(() => {
+      this.notificationService.openDialog("Book marked as received!", false);
+      this.loadBooks();
     });
   }
-/*  onReserve(book: BookDto): void {
-    this.bookService.reserveBook(book.id).subscribe(
-      () => this.loadBooks(),
-        (error: any) => console.error('Error reserving book', error)
-    );
+
+  markAsReturned(bookId: number) {
+    this.bookService.markAsReturned(this.authService.getUsername(), bookId).subscribe(() => {
+      this.notificationService.openDialog("Book returned successfully!", false);
+      this.loadBooks();
+    });
   }
 
-  onCancel(book: BookDto): void {
-    this.bookService.cancelReservation(book.id).subscribe(
-      () => this.loadBooks(),
-        (error: any) => console.error('Error cancelling reservation', error)
-    );
-  }
-
-  onMarkReceived(book: BookDto): void {
-    this.bookService.markAsReceived(book.id).subscribe(
-      () => this.loadBooks(),
-        (error: any) => console.error('Error marking book as received', error)
-    );
-  }
-
-  onMarkReturned(book: BookDto): void {
-    this.bookService.markAsReturned(book.id).subscribe(
-      () => this.loadBooks(),
-        (error: any) => console.error('Error marking book as returned', error)
-    );
-  }*/
+  protected readonly BookStatus = BookStatus;
 }

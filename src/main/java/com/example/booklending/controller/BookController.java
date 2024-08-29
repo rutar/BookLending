@@ -1,7 +1,7 @@
 package com.example.booklending.controller;
 
 import com.example.booklending.dto.BookDto;
-import com.example.booklending.exceptions.ConflictException;
+import com.example.booklending.exception.ConflictException;
 import com.example.booklending.service.BookService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,9 +40,9 @@ public class BookController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping
-    public ResponseEntity<?> createBook(@RequestBody BookDto bookDto) {
+    public ResponseEntity<?> createBook(@RequestBody BookDto bookDto, @RequestParam String userName) {
         try {
-            Optional<BookDto> savedBookDto = bookService.createBook(bookDto);
+            Optional<BookDto> savedBookDto = bookService.createBook(bookDto, userName);
 
             return savedBookDto
                     .map(book -> ResponseEntity
@@ -121,15 +122,21 @@ public class BookController {
             @ApiResponse(responseCode = "404", description = "Book not found")
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteBook(@Parameter(description = "ID of the book to delete") @PathVariable Long id) {
-        Optional<BookDto> bookDto = bookService.getBookById(id);
-        if (bookDto.isPresent()) {
-            bookService.deleteBook(id);
+    public ResponseEntity<Void> deleteBook(@Parameter(description = "ID of the book to delete") @PathVariable Long id,  @RequestParam String userName) {
+
+        try {
+            bookService.deleteBook(id, userName);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
+        }
+        catch (EntityNotFoundException e){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+        catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
+
 
     @Operation(summary = "Search for books", description = "Searches for books based on title, author, or ISBN.")
     @ApiResponses(value = {

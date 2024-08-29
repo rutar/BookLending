@@ -1,4 +1,4 @@
-package com.example.booklending.exceptions;
+package com.example.booklending.exception;
 
 public class UserAlreadyExistsException extends RuntimeException {
     public UserAlreadyExistsException(String message) {

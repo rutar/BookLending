@@ -57,7 +57,7 @@ class ActionServiceTest {
         Action.setId(1L);
         Action.setBook(book);
         Action.setUser(user);
-        Action.setAction(ActionType.RESERVE);
+        Action.setAction(ActionType.RESERVE_BOOK);
         Action.setActionDate(LocalDateTime.now());
         Action.setDueDate(LocalDateTime.now().plusHours(24));
     }
@@ -72,7 +72,7 @@ class ActionServiceTest {
         ActionDto result = ActionService.reserveBook(1L, 1L);
 
         assertNotNull(result);
-        assertEquals(ActionType.RESERVE, result.getActionType());
+        assertEquals(ActionType.RESERVE_BOOK, result.getActionType());
         assertEquals(BookStatus.RESERVED, book.getStatus());
     }
 
@@ -99,7 +99,7 @@ class ActionServiceTest {
     void testCancelReservationSuccess() {
         when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(user));
         when(bookRepository.findById(any(Long.class))).thenReturn(Optional.of(book));
-        when(ActionRepository.findByBookIdAndAction(any(Long.class), eq(ActionType.RESERVE)))
+        when(ActionRepository.findByBookIdAndAction(any(Long.class), eq(ActionType.RESERVE_BOOK)))
                 .thenReturn(Collections.singletonList(Action));
         when(ActionRepository.save(any(Action.class))).thenReturn(Action);
         when(bookRepository.save(any(Book.class))).thenReturn(book);
@@ -107,7 +107,7 @@ class ActionServiceTest {
         ActionDto result = ActionService.cancelReservation(1L, 1L);
 
         assertNotNull(result);
-        assertEquals(ActionType.CANCEL, result.getActionType());
+        assertEquals(ActionType.CANCEL_BOOK_RESERVATION, result.getActionType());
         assertEquals(BookStatus.AVAILABLE, book.getStatus());
     }
 
@@ -115,7 +115,7 @@ class ActionServiceTest {
     void testCancelReservationNotFound() {
         when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(user));
         when(bookRepository.findById(any(Long.class))).thenReturn(Optional.of(book));
-        when(ActionRepository.findByBookIdAndAction(any(Long.class), eq(ActionType.RESERVE)))
+        when(ActionRepository.findByBookIdAndAction(any(Long.class), eq(ActionType.RESERVE_BOOK)))
                 .thenReturn(Collections.emptyList());
 
         RuntimeException thrown = assertThrows(RuntimeException.class, () -> ActionService.cancelReservation(1L, 1L));
@@ -127,7 +127,7 @@ class ActionServiceTest {
     void testMarkAsReceivedSuccess() {
         when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(user));
         when(bookRepository.findById(any(Long.class))).thenReturn(Optional.of(book));
-        when(ActionRepository.findByBookIdAndAction(any(Long.class), eq(ActionType.RESERVE)))
+        when(ActionRepository.findByBookIdAndAction(any(Long.class), eq(ActionType.RESERVE_BOOK)))
                 .thenReturn(Collections.singletonList(Action));
         when(ActionRepository.save(any(Action.class))).thenReturn(Action);
         when(bookRepository.save(any(Book.class))).thenReturn(book);
@@ -135,7 +135,7 @@ class ActionServiceTest {
         ActionDto result = ActionService.markAsReceived(1L, 1L);
 
         assertNotNull(result);
-        assertEquals(ActionType.RECEIVE, result.getActionType());
+        assertEquals(ActionType.RECEIVE_BOOK, result.getActionType());
         assertEquals(BookStatus.BORROWED, book.getStatus());
     }
 
@@ -143,7 +143,7 @@ class ActionServiceTest {
     void testMarkAsReceivedReservationNotFound() {
         when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(user));
         when(bookRepository.findById(any(Long.class))).thenReturn(Optional.of(book));
-        when(ActionRepository.findByBookIdAndAction(any(Long.class), eq(ActionType.RESERVE)))
+        when(ActionRepository.findByBookIdAndAction(any(Long.class), eq(ActionType.RESERVE_BOOK)))
                 .thenReturn(Collections.emptyList());
 
         RuntimeException thrown = assertThrows(RuntimeException.class, () -> ActionService.markAsReceived(1L, 1L));
@@ -155,7 +155,7 @@ class ActionServiceTest {
     void testMarkAsReturnedSuccess() {
         when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(user));
         when(bookRepository.findById(any(Long.class))).thenReturn(Optional.of(book));
-        when(ActionRepository.findByBookIdAndAction(any(Long.class), eq(ActionType.RECEIVE)))
+        when(ActionRepository.findByBookIdAndAction(any(Long.class), eq(ActionType.RECEIVE_BOOK)))
                 .thenReturn(Collections.singletonList(Action));
         when(ActionRepository.save(any(Action.class))).thenReturn(Action);
         when(bookRepository.save(any(Book.class))).thenReturn(book);
@@ -163,7 +163,7 @@ class ActionServiceTest {
         ActionDto result = ActionService.markAsReturned(1L, 1L);
 
         assertNotNull(result);
-        assertEquals(ActionType.RETURN, result.getActionType());
+        assertEquals(ActionType.RETURN_BOOK, result.getActionType());
         assertEquals(BookStatus.AVAILABLE, book.getStatus());
     }
 
@@ -171,7 +171,7 @@ class ActionServiceTest {
     void testMarkAsReturnedNotFound() {
         when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(user));
         when(bookRepository.findById(any(Long.class))).thenReturn(Optional.of(book));
-        when(ActionRepository.findByBookIdAndAction(any(Long.class), eq(ActionType.RECEIVE)))
+        when(ActionRepository.findByBookIdAndAction(any(Long.class), eq(ActionType.RECEIVE_BOOK)))
                 .thenReturn(Collections.emptyList());
 
         RuntimeException thrown = assertThrows(RuntimeException.class, () -> ActionService.markAsReturned(1L, 1L));

@@ -9,7 +9,8 @@ export class AuthService {
 
   private baseUrl = 'http://localhost:8080/api/auth';  // Adjust to your backend URL
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {
+  }
 
   login(username: string, password: string): Observable<string> {
     return this.http.post(`${this.baseUrl}/login`, { username, password }, { responseType: 'text' });
@@ -21,6 +22,15 @@ export class AuthService {
 
   getToken(): string | null {
     return localStorage.getItem('authToken');
+  }
+
+  getUsername(): string   {
+    const token = this.getToken();
+    if (token) {
+      const decodedPayload = this.decodeJwtPayload(token);
+      return decodedPayload?.sub;
+    }
+    return "";
   }
 
   removeToken() {

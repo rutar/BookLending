@@ -1,10 +1,15 @@
 package com.example.booklending.service;
 
 import com.example.booklending.dto.BookDto;
-import com.example.booklending.exceptions.BookAlreadyExistsException;
-import com.example.booklending.exceptions.ConflictException;
+import com.example.booklending.exception.BookAlreadyExistsException;
+import com.example.booklending.exception.ConflictException;
+import com.example.booklending.model.Action;
+import com.example.booklending.model.ActionType;
 import com.example.booklending.model.Book;
+import com.example.booklending.model.User;
+import com.example.booklending.repository.ActionRepository;
 import com.example.booklending.repository.BookRepository;
+import com.example.booklending.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +17,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -23,10 +29,13 @@ public class BookService {
 
     private final ModelMapper modelMapper;
     private final BookRepository bookRepository;
+    private final UserRepository userRepository;
+    private final ActionRepository actionRepository;
 
     @Transactional
-    public Optional<BookDto> createBook(BookDto bookDto) {
+    public Optional<BookDto> createBook(BookDto bookDto, String userName) {
         log.info("Attempting to create a new book with ISBN: {}", bookDto.getIsbn());
+        User user = userRepository.findByUsername(userName).orElseThrow(() -> new RuntimeException("User not found"));
         try {
             // Check if the book already exists by ISBN
             if (bookRepository.findByIsbn(bookDto.getIsbn()).isPresent()) {
@@ -36,6 +45,15 @@ public class BookService {
 
             Book book = modelMapper.map(bookDto, Book.class);
             Book savedBook = bookRepository.save(book);
+
+            Action action = new Action();
+            action.setBook(book);
+            action.setUser(user);
+            action.setAction(ActionType.ADD_BOOK);
+            action.setActionDate(LocalDateTime.now());
+            actionRepository.save(action);
+
+
             log.info("Book created successfully with ID: {}", savedBook.getId());
 
             BookDto savedBookDto = modelMapper.map(savedBook, BookDto.class);
@@ -88,10 +106,23 @@ public class BookService {
     }
 
     @Transactional
-    public void deleteBook(Long id) {
+    public void deleteBook(Long id, String userName) {
+
         log.info("Attempting to delete book with ID: {}", id);
+
+        User user = userRepository.findByUsername(userName).orElseThrow(() -> new EntityNotFoundException("User " + userName + " not found"));
         Optional<Book> bookToDelete = bookRepository.findById(id);
+
         if (bookToDelete.isPresent()) {
+
+
+            Action action = new Action();
+            action.setBook(bookToDelete.get());
+            action.setUser(user);
+            action.setAction(ActionType.DELETE_BOOK);
+            action.setActionDate(LocalDateTime.now());
+            actionRepository.save(action);
+
             bookRepository.delete(bookToDelete.get());
             log.info("Book deleted successfully with ID: {}", id);
         } else {

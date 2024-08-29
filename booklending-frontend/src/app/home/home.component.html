@@ -1,13 +1,58 @@
-<div class="dashboard-container">
-  <!-- Header Section -->
-  <div class="content-header">
-    <h1>Book Borrowing Dashboard</h1>
+<div class="home-container">
+  <!-- Search string -->
+  <div class="search-bar">
+    <input type="text" placeholder="Search for a book..." [(ngModel)]="searchQuery" (input)="onSearch()"/>
   </div>
 
-  <!-- Book List -->
-  <div class="content-body">
+
+  <!-- Book List and Grid -->
+  <section class="content-body">
     <div class="book-grid">
+      <div *ngFor="let book of books" class="book-card">
+        <img [src]="book.coverUrl" alt="{{ book.title }}" class="book-cover">
+        <h3>{{ book.title }}</h3>
+        <p>{{ book.author }}</p>
+        <p>
+          Status:
+          <span
+            [ngClass]="{
+              'available': book.status === BookStatus.AVAILABLE,
+              'lentout': book.status === BookStatus.LENT_OUT,
+              'reserved': book.status === BookStatus.RESERVED
+            }">
+            {{ book.status | titlecase }}
+          </span>
+        </p>
 
+        <div class="button-group">
+          <button
+            *ngIf="book.status === BookStatus.AVAILABLE"
+            (click)="reserveBook(book.id)"
+            class="reserve-btn">
+            RESERVE
+          </button>
+          <button
+            *ngIf="book.status === BookStatus.RESERVED"
+            (click)="cancelReservation(book.id)"
+            class="cancel-btn">
+            Cancel Reservation
+          </button>
+          <button
+            *ngIf="book.status === BookStatus.LENT_OUT"
+            (click)="markAsReceived(book.id)"
+            class="received-btn">
+            RECEIVED
+          </button>
+          <button
+            *ngIf="book.status === BookStatus.BORROWED"
+            (click)="markAsReturned(book.id)"
+            class="received-btn">
+            RETURNED
+          </button>
+        </div>
+      </div>
     </div>
-  </div>
+  </section>
+
+
 </div>

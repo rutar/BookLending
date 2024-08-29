@@ -1,7 +1,7 @@
 package com.example.booklending.service;
 
 import com.example.booklending.dto.BookDto;
-import com.example.booklending.exceptions.ConflictException;
+import com.example.booklending.exception.ConflictException;
 import com.example.booklending.model.Book;
 import com.example.booklending.model.BookStatus;
 import com.example.booklending.repository.BookRepository;

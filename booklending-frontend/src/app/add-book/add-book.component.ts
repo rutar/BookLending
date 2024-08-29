@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Output, HostListener } from '@angular/core';
+import {Component, EventEmitter, HostListener, Output} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {BookDto, BookService} from '../services/book.service';
 import {NotificationService} from '../services/notification.service';
@@ -28,7 +28,7 @@ export class AddBookComponent {
       author: ['', [Validators.required, Validators.minLength(1)]],
       coverUrl: ['', [Validators.required, Validators.pattern('^(https?:\\/\\/)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(\\/\\S*)?$')]],
       isbn: ['', [Validators.required, Validators.pattern('^(?:\\d{9}X|\\d{10}|(978|979)\\d{10})$')]],
-      status: ['available', Validators.required]
+      status: ['AVAILABLE', Validators.required]
     });
   }
 
@@ -54,7 +54,7 @@ export class AddBookComponent {
             author: '',
             coverUrl: '',
             isbn: '',
-            status: 'available'
+            status: 'AVAILABLE'
           });
           // Emit event to notify that a book was added
           this.bookAdded.emit();

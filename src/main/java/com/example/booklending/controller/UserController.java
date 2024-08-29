@@ -1,8 +1,8 @@
 package com.example.booklending.controller;
 
 import com.example.booklending.dto.UserDto;
-import com.example.booklending.exceptions.ConflictException;
-import com.example.booklending.exceptions.UserAlreadyExistsException;
+import com.example.booklending.exception.ConflictException;
+import com.example.booklending.exception.UserAlreadyExistsException;
 import com.example.booklending.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

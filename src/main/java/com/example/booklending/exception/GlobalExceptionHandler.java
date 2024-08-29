@@ -1,4 +1,4 @@
-package com.example.booklending.exceptions;
+package com.example.booklending.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

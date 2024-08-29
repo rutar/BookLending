@@ -1,4 +1,4 @@
-package com.example.booklending.exceptions;
+package com.example.booklending.exception;
 
 public class ConflictException extends RuntimeException {
     public ConflictException(String message) {

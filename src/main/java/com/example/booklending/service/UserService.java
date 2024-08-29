@@ -2,8 +2,8 @@ package com.example.booklending.service;
 
 import com.example.booklending.configuration.RoleIdGrantedAuthority;
 import com.example.booklending.dto.UserDto;
-import com.example.booklending.exceptions.ConflictException;
-import com.example.booklending.exceptions.UserAlreadyExistsException;
+import com.example.booklending.exception.ConflictException;
+import com.example.booklending.exception.UserAlreadyExistsException;
 import com.example.booklending.model.User;
 import com.example.booklending.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;

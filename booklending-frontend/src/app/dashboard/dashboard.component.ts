@@ -4,6 +4,7 @@ import {AddBookComponent} from '../add-book/add-book.component';
 import {NotificationService} from '../services/notification.service';
 import {BookDto, BookService, BookStatus} from "../services/book.service";
 import {HttpClientModule} from '@angular/common/http';
+import {AuthService} from '../services/auth.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -15,9 +16,9 @@ import {HttpClientModule} from '@angular/common/http';
 export class DashboardComponent implements OnInit {
   isAddBookModalVisible = false;
   books: BookDto[] = [];
-  currentUserId = 1; // Example user ID, replace with actual user ID in your app
 
-  constructor(private notificationService: NotificationService, private booksService: BookService) {
+
+  constructor(private authService: AuthService, private notificationService: NotificationService, private booksService: BookService) {
   }
 
   ngOnInit(): void {
@@ -45,7 +46,7 @@ export class DashboardComponent implements OnInit {
 
   // Reserve a book
   onReserveBook(book: BookDto): void {
-    this.booksService.reserveBook(this.currentUserId, book.id).subscribe(updatedBook => {
+    this.booksService.reserveBook(this.authService.getUsername(), book.id).subscribe(updatedBook => {
       this.updateBookInList(updatedBook);
       this.notificationService.openDialog("Book reserved successfully.", false);
     });
@@ -53,25 +54,33 @@ export class DashboardComponent implements OnInit {
 
   // Cancel a reservation
   onCancelReservation(book: BookDto): void {
-    this.booksService.cancelReservation(this.currentUserId, book.id).subscribe(updatedBook => {
+    this.booksService.cancelReservation(this.authService.getUsername(), book.id).subscribe(updatedBook => {
       this.updateBookInList(updatedBook);
       this.notificationService.openDialog("Reservation canceled successfully.", false);
     });
   }
 
-  // Mark a book as received
+  // Mark a book as received by user
   onMarkAsReceived(book: BookDto): void {
-    this.booksService.markAsReceived(this.currentUserId, book.id).subscribe(updatedBook => {
+    this.booksService.markAsReceived(this.authService.getUsername(), book.id).subscribe(updatedBook => {
       this.updateBookInList(updatedBook);
-      this.notificationService.openDialog("Book marked as received.", false);
+      this.notificationService.openDialog("Book received.", false);
     });
   }
 
-  // Mark a book as returned
-  onMarkAsReturned(book: BookDto): void {
-    this.booksService.markAsReturned(this.currentUserId, book.id).subscribe(updatedBook => {
+  // Mark a book as returned back to library
+  onMarkAsLentout(book: BookDto): void {
+    this.booksService.markAsLentout(this.authService.getUsername(), book.id).subscribe(updatedBook => {
       this.updateBookInList(updatedBook);
-      this.notificationService.openDialog("Book marked as returned.", false);
+      this.notificationService.openDialog("Book lent out.", false);
+    });
+  }
+
+  // Mark a book as returned back to library
+  onMarkAsReturned(book: BookDto): void {
+    this.booksService.markAsReturned(this.authService.getUsername(), book.id).subscribe(updatedBook => {
+      this.updateBookInList(updatedBook);
+      this.notificationService.openDialog("Book returned.", false);
     });
   }
 

@@ -27,8 +27,10 @@
           <span
             [ngClass]="{
               'available': book.status === BookStatus.AVAILABLE,
+              'reserved': book.status === BookStatus.RESERVED,
+              'lent_out': book.status === BookStatus.LENT_OUT,
               'borrowed': book.status === BookStatus.BORROWED,
-              'reserved': book.status === BookStatus.RESERVED
+              'returned': book.status === BookStatus.RETURNED
             }">
             {{ book.status | titlecase }}
           </span>
@@ -41,11 +43,23 @@
             class="cancel-btn">
             Cancel Reservation
           </button>
-          <button
-            *ngIf="book.status === BookStatus.BORROWED"
+<!--          <button
+            *ngIf="book.status === BookStatus.LENT_OUT || book.status === BookStatus.BORROWED"
             (click)="onMarkAsReturned(book)"
             class="return-btn">
-            Mark as Returned
+            Returned
+          </button>-->
+          <button
+            *ngIf="book.status === BookStatus.RESERVED "
+            (click)="onMarkAsLentout(book)"
+            class="lentout-btn">
+            Lent Out
+          </button>
+          <button
+            *ngIf="book.status === BookStatus.RETURNED"
+            (click)="onMarkAsReturned(book)"
+            class="return-btn">
+            Accept Returned
           </button>
           <button
             *ngIf="book.status === BookStatus.AVAILABLE"
@@ -58,6 +72,7 @@
     </div>
   </section>
 
-  <app-add-book *ngIf="isAddBookModalVisible" (closeModal)="isAddBookModalVisible = false" (bookAdded)="onBookAdded()"></app-add-book>
+  <app-add-book *ngIf="isAddBookModalVisible" (closeModal)="isAddBookModalVisible = false"
+                (bookAdded)="onBookAdded()"></app-add-book>
 
 </div>

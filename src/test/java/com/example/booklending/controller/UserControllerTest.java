@@ -1,7 +1,7 @@
 package com.example.booklending.controller;
 
 import com.example.booklending.dto.UserDto;
-import com.example.booklending.exceptions.UserAlreadyExistsException;
+import com.example.booklending.exception.UserAlreadyExistsException;
 import com.example.booklending.service.UserService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

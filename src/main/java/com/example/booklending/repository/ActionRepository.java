@@ -8,6 +8,5 @@ import java.util.List;
 
 public interface ActionRepository extends JpaRepository<Action, Long> {
     List<Action> findByUserIdAndAction(Long userId, ActionType action);
-
     List<Action> findByBookIdAndAction(Long bookId, ActionType action);
 }

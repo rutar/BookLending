@@ -1,17 +1,84 @@
-$primary-color: #4CAF50;
-$padding: 1rem;
+// Define Variables
+$container-max-width: 800px;
+$input-padding: 10px;
+$input-border: #ccc;
+$input-border-radius: 4px;
+$gap: 20px;
+$book-card-padding: 20px;
+$book-card-border: #ddd;
+$book-card-background: #f9f9f9;
+$button-background: #007bff;
+$button-background-hover: #0056b3;
+$button-text-color: white;
+$notification-background: #28a745;
+$notification-text-color: white;
+$notification-padding: 10px;
+$border-radius: 4px;
+$fixed-top-background: #fff; // Background color for fixed element
+$fixed-top-z-index: 1000; // Z-index to ensure it's on top
 
 .home-container {
-  padding: $padding;
-  text-align: center;
+  max-width: $container-max-width;
+  margin: 0 auto;
+  padding-top: $input-padding; // Space for fixed search bar
+}
 
-  h2 {
-    color: $primary-color;
-    margin-bottom: $padding;
-  }
+.search-bar {
+  position: fixed; // Fix the position to the viewport
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: $fixed-top-background;
+  z-index: $fixed-top-z-index;
+  padding: $input-padding;
+  border-bottom: 1px solid $input-border;
 
-  p {
-    font-size: 1.2rem;
-    color: #666;
+  input {
+    width: 100%;
+    padding: $input-padding;
+    border: 1px solid $input-border;
+    border-radius: $input-border-radius;
   }
+}
+
+.book-list {
+  display: flex;
+  flex-direction: column;
+  gap: $gap;
+  margin-top: $input-padding; // Adjust for the height of the fixed search bar
+}
+
+.book-card {
+  padding: $book-card-padding;
+  border: 1px solid $book-card-border;
+  border-radius: $border-radius;
+  background-color: $book-card-background;
+
+  h3 {
+    margin-top: 0;
+  }
+}
+
+.actions {
+  button {
+    margin-right: 10px;
+    padding: $input-padding;
+    border: none;
+    border-radius: $border-radius;
+    cursor: pointer;
+    background-color: $button-background;
+    color: $button-text-color;
+
+    &:hover {
+      background-color: $button-background-hover;
+    }
+  }
+}
+
+.notification {
+  margin-top: $gap;
+  padding: $notification-padding;
+  background-color: $notification-background;
+  color: $notification-text-color;
+  border-radius: $border-radius;
 }

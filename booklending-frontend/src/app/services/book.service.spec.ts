@@ -41,7 +41,7 @@ describe('BooksService', () => {
           title: 'Book 2',
           author: 'Author 2',
           isbn: '67890',
-          status: BookStatus.BORROWED,
+          status: BookStatus.LENT_OUT,
           coverUrl: 'http://example.com/cover2.jpg'
         }
       ];

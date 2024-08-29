@@ -51,16 +51,16 @@ public class ActionRepositoryTest extends AbstractIntegrationTest {
         Action action = new Action();
         action.setUser(savedUser);
         action.setBook(savedbook);
-        action.setAction(ActionType.RESERVE);
+        action.setAction(ActionType.RESERVE_BOOK);
         action.setActionDate(LocalDateTime.now());
         ActionRepository.save(action);
 
         // Test the repository method
-        List<Action> actions = ActionRepository.findByUserIdAndAction(user.getId(), ActionType.RESERVE);
+        List<Action> actions = ActionRepository.findByUserIdAndAction(user.getId(), ActionType.RESERVE_BOOK);
 
         assertEquals(1, actions.size());
         assertTrue(actions.stream().anyMatch(act -> act.getUser().equals(user)
-                && act.getAction() == ActionType.RESERVE));
+                && act.getAction() == ActionType.RESERVE_BOOK));
     }
 
     @Test
@@ -85,15 +85,15 @@ public class ActionRepositoryTest extends AbstractIntegrationTest {
         Action act = new Action();
         act.setUser(savedUser);
         act.setBook(savedbook);
-        act.setAction(ActionType.RETURN);
+        act.setAction(ActionType.RETURN_BOOK);
         act.setActionDate(LocalDateTime.now());
         ActionRepository.save(act);
 
         // Test the repository method
-        List<Action> actions = ActionRepository.findByBookIdAndAction(book.getId(), ActionType.RETURN);
+        List<Action> actions = ActionRepository.findByBookIdAndAction(book.getId(), ActionType.RETURN_BOOK);
 
         assertEquals(1, actions.size());
         assertTrue(actions.stream().anyMatch(action -> action.getBook().equals(book)
-                && action.getAction() == ActionType.RETURN));
+                && action.getAction() == ActionType.RETURN_BOOK));
     }
 }
