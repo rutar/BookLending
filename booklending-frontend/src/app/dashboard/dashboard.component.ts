@@ -2,7 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {AddBookComponent} from '../add-book/add-book.component';
 import {NotificationService} from '../services/notification.service';
-import {BookDto, BookService} from "../services/book.service";
+import {BookDto, BookService, BookStatus} from "../services/book.service";
 import {HttpClientModule} from '@angular/common/http';
 
 @Component({
@@ -90,4 +90,6 @@ export class DashboardComponent implements OnInit {
       this.books[index] = updatedBook;
     }
   }
+
+  public BookStatus = BookStatus;
 }

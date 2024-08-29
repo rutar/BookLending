@@ -7,11 +7,13 @@
     </div>
   </div>
 
-  <header class="content-header">
-    <h1>Books Lending</h1>
-  </header>
-
-  <button (click)="onAddBook()" class="add-btn">Add New Book</button>
+  <!-- Sticky Header and Add Book Button -->
+  <div class="header-container">
+    <header class="content-header">
+      <h1>Books Lending</h1>
+    </header>
+    <button (click)="onAddBook()" class="add-btn">Add New Book</button>
+  </div>
 
   <!-- Book List and Grid -->
   <section class="content-body">
@@ -24,9 +26,9 @@
           Status:
           <span
             [ngClass]="{
-              'available': book.status === 'available',
-              'borrowed': book.status === 'borrowed',
-              'reserved': book.status === 'reserved'
+              'available': book.status === BookStatus.AVAILABLE,
+              'borrowed': book.status === BookStatus.BORROWED,
+              'reserved': book.status === BookStatus.RESERVED
             }">
             {{ book.status | titlecase }}
           </span>
@@ -34,19 +36,19 @@
 
         <div class="button-group">
           <button
-            *ngIf="book.status === 'reserved'"
+            *ngIf="book.status === BookStatus.RESERVED"
             (click)="onCancelReservation(book)"
             class="cancel-btn">
             Cancel Reservation
           </button>
           <button
-            *ngIf="book.status === 'borrowed'"
+            *ngIf="book.status === BookStatus.BORROWED"
             (click)="onMarkAsReturned(book)"
             class="return-btn">
             Mark as Returned
           </button>
           <button
-            *ngIf="book.status === 'available'"
+            *ngIf="book.status === BookStatus.AVAILABLE"
             (click)="onRemoveBook(book)"
             class="remove-btn">
             Remove Book
@@ -55,4 +57,7 @@
       </div>
     </div>
   </section>
+
+  <app-add-book *ngIf="isAddBookModalVisible" (closeModal)="isAddBookModalVisible = false" (bookAdded)="onBookAdded()"></app-add-book>
+
 </div>

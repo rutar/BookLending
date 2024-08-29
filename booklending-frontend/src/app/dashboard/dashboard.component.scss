@@ -8,50 +8,68 @@ $shadow-color: rgba(0, 0, 0, 0.1);
 
 .dashboard-container {
   position: relative;
-  padding: $padding;
+  padding: 0 $padding $padding;
   background-color: $background-color;
   border-radius: 8px;
   box-shadow: 0 0 10px $shadow-color;
 
-  .content-header {
-    margin-bottom: 10px;
+  // Sticky Header and Add Button
+  .header-container {
+    position: sticky;
+    top: 0;
+    left: 0;
+    width: 98.4%;
+    background-color: white;  // Ensure the header has a background color
+    z-index: 1000;
+    padding: $padding;
+    display: block;
+    justify-content: space-evenly;
+    align-items: center;
+    box-shadow: 0 2px 5px $shadow-color;
 
-    h1 {
-      font-size: 1.5rem;
-      color: $primary-color;
-      margin: 0;
+    .content-header {
+      margin-bottom: 0;
+
+      h1 {
+        font-size: 1.5rem;
+        color: $primary-color;
+        margin: 0;
+      }
+    }
+
+    .add-btn {
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      color: #fff;
+      background-color: $primary-color;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+      &:hover {
+        background-color: darken($primary-color, 10%);
+      }
     }
   }
 
-  .add-btn {
-    display: block;
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
-    color: #fff;
-    background-color: $primary-color;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    margin-bottom: 20px;
-
-    &:hover {
-      background-color: darken($primary-color, 10%);
-    }
+  // Add top margin to the content to avoid overlapping with the sticky header
+  .content-body {
+    margin-top: 80px; // Adjust this based on the height of the header and button
   }
 
   .modal-overlay {
-    position: fixed; // Fixed positioning to cover the entire viewport
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); // Semi-transparent background
+    background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000; // Higher z-index to ensure it appears on top
+    z-index: 1001;
   }
 
   .modal-content {
@@ -61,7 +79,7 @@ $shadow-color: rgba(0, 0, 0, 0.1);
     max-width: 500px;
     width: 100%;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    z-index: 1001; // Higher z-index to ensure it appears above the overlay
+    z-index: 1002;
   }
 
   .close-btn {
@@ -90,8 +108,7 @@ $shadow-color: rgba(0, 0, 0, 0.1);
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         display: flex;
         flex-direction: column;
-        justify-content: space-between;  // Space out content, keeping buttons at bottom
-        // Remove height: 100%; to prevent forced height across grid items
+        justify-content: space-between;
 
         .book-cover {
           width: 100%;
@@ -150,7 +167,7 @@ $shadow-color: rgba(0, 0, 0, 0.1);
           &.remove-btn {
             background-color: $secondary-color;
             color: white;
-            margin-top: 10px;  // Ensure there's some space above the button
+            margin-top: 10px;
           }
 
           &:hover {

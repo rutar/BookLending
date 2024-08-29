@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Output} from '@angular/core';
+import {Component, EventEmitter, Output, HostListener } from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {BookDto, BookService} from '../services/book.service';
 import {NotificationService} from '../services/notification.service';
@@ -15,6 +15,7 @@ export class AddBookComponent {
   addBookForm: FormGroup;
 
   @Output() bookAdded = new EventEmitter<void>();
+  @Output() closeModal = new EventEmitter<void>();  // EventEmitter for closing the modal
 
   constructor(
     private fb: FormBuilder,
@@ -30,6 +31,13 @@ export class AddBookComponent {
       status: ['available', Validators.required]
     });
   }
+
+  // Listen for 'Escape' key press and emit closeModal event
+  @HostListener('document:keydown.escape', ['$event'])
+  onEscapePress(event: KeyboardEvent) {
+    this.closeModal.emit(); // Emit the event to close the modal
+  }
+
 
   // Method called when the form is submitted
   onSubmit() {

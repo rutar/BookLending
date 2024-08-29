@@ -4,9 +4,9 @@ import {Observable} from 'rxjs';
 
 
 export enum BookStatus {
-  AVAILABLE = 'available',
-  BORROWED = 'borrowed',
-  RESERVED = 'reserved'
+  AVAILABLE = 'AVAILABLE',
+  BORROWED = 'BORROWED',
+  RESERVED = 'RESERVED'
 }
 
 export interface BookDto {
