@@ -3,10 +3,7 @@ package com.example.booklending.service;
 import com.example.booklending.dto.BookDto;
 import com.example.booklending.exception.BookAlreadyExistsException;
 import com.example.booklending.exception.ConflictException;
-import com.example.booklending.model.Action;
-import com.example.booklending.model.ActionType;
-import com.example.booklending.model.Book;
-import com.example.booklending.model.User;
+import com.example.booklending.model.*;
 import com.example.booklending.repository.ActionRepository;
 import com.example.booklending.repository.BookRepository;
 import com.example.booklending.repository.UserRepository;
@@ -14,15 +11,21 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.data.domain.Sort;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +36,10 @@ public class BookService {
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
     private final ActionRepository actionRepository;
+
+    @Value("${spring.application.defaults.page-size}")
+    private String defaultPageSize;
+
 
     @Transactional
     public Optional<BookDto> createBook(BookDto bookDto, String userName) {
@@ -133,7 +140,7 @@ public class BookService {
         }
     }
 
-    public List<BookDto> getBooks(String searchQuery, String sortBy, String order) {
+    public PagedResponse<BookDto> getBooks(String searchQuery, String page, String size, String sortBy, String order, String statuses) {
         log.info("Fetching books with search query: {}, sorting by: {}, order: {}", searchQuery, sortBy, order);
 
         // Create a sorting object based on the sortBy and order parameters
@@ -153,12 +160,55 @@ public class BookService {
             );
         }
 
+        // Add status filtering
+        if (statuses != null && !statuses.isEmpty()) {
+            // Split the statuses string into an array
+            String[] statusArray = statuses.split(",");
+            List<BookStatus> statusList = Arrays.stream(statusArray)
+                    .map(String::trim)
+                    .map(BookStatus::valueOf)
+                    .collect(Collectors.toList());
+
+            spec = spec.and((root, query, criteriaBuilder) ->
+                    root.get("status").in(statusList)
+            );
+        }
+
+        // Parsing and handling the size parameter
+        int pageSize;
+        try {
+            pageSize = Integer.parseInt(size);
+        } catch (NumberFormatException e) {
+            log.error("Invalid size parameter: {}. Defaulting to {} results.", size, defaultPageSize);
+            pageSize = Integer.parseInt(size); // Default size if parsing fails
+        }
+
+        // Parsing and handling the page parameter
+        int pageNumber;
+        try {
+            pageNumber = Integer.parseInt(page);
+        } catch (NumberFormatException e) {
+            log.error("Invalid page parameter: {}. Defaulting to page 0.", page);
+            pageNumber = 0; // Default page if parsing fails
+        }
+
+        // Limiting the number of results
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+
         // Fetch the filtered and sorted list of books
-        return  bookRepository.findAll(spec, sort).stream()
+        Page<BookDto> bookPage = bookRepository.findAll(spec, pageable)
                 .map(book -> {
                     log.debug("Mapping book entity to DTO for book ID: {}", book.getId());
                     return modelMapper.map(book, BookDto.class);
-                })
-                .collect(Collectors.toList());
+                });
+
+        return new PagedResponse<>(
+                bookPage.getContent(),
+                bookPage.getTotalElements(),
+                bookPage.getTotalPages(),
+                bookPage.isLast(),
+                bookPage.getSize(),
+                bookPage.getNumber()
+        );
     }
 }

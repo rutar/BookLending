@@ -43,7 +43,9 @@
   .book-cover-preview {
     width: 200px;
     height: auto;
-    margin-top: 10px;
+    display: block;
+    margin-bottom: 10px;
+    margin-left: 140px;
     border: 1px solid #ccc;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
   }

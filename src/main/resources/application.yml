@@ -9,11 +9,15 @@ jwt:
 spring:
   application:
     name: BookLending
+    defaults:
+      page-size: 200
+
   datasource:
     url: jdbc:postgresql://localhost:5432/booklending
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -23,6 +27,8 @@ spring:
   jackson:
     serialization:
       indent-output: true
+
+
 
 liquibase:
   change-log: classpath:db/changelog/db.changelog-master.yaml

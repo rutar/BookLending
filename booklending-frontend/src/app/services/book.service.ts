@@ -20,6 +20,15 @@ export enum BookStatus {
   RETURNED = 'RETURNED'
 }
 
+export interface PagedResponse<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  last: boolean;
+  size: number;
+  number: number;
+}
+
 
 // Interface for creating a new book, which does not include the ID
 export interface CreateBook {
@@ -37,20 +46,34 @@ export class BookService {
 
   private bookServiceBaseUrl = 'http://localhost:8080/api/books';  // URL for your backend API
   private actionServiceBaseUrl = 'http://localhost:8080/api/actions'; // URL for book actions
-
+  private readonly maxPageSize = 200;
   constructor(private http: HttpClient, private authService: AuthService) {
   }
 
 
   // Method to fetch books from the server with search and sorting
-  getBooks(searchQuery: string = '', sortBy: string = 'title', order: string = 'asc'): Observable<any[]> {
+  getBooks(
+    page: number = 0,
+    searchQuery: string = '',
+    sortBy: string = 'title',
+    order: string = 'asc',
+    statuses: BookStatus[] = []
+  ): Observable<PagedResponse<BookDto>> {
     let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', this.maxPageSize.toString())
       .set('searchQuery', searchQuery)
       .set('sortBy', sortBy)
       .set('order', order);
 
-    return this.http.get<BookDto[]>(this.bookServiceBaseUrl, { params });
+    // Add each status to the params
+    statuses.forEach(status => {
+      params = params.append('statuses', status);
+    });
+
+    return this.http.get<PagedResponse<BookDto>>(this.bookServiceBaseUrl, { params });
   }
+
 
   // Fetch a single book by ID
   getBookById(id: number): Observable<BookDto> {

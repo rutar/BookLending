@@ -3,8 +3,13 @@
   <div *ngIf="isAddBookModalVisible" class="modal-overlay" (click)="onCloseModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <button class="close-btn" (click)="onCloseModal()">×</button>
-      <app-add-book (bookAdded)="onBookAdded()"></app-add-book>
+      <app-add-book (bookAdded)="onAddBook()"></app-add-book>
     </div>
+  </div>
+
+  <!-- Loading Modal -->
+  <div *ngIf="isLoading" class="modal-overlay">
+    <div class="loader"></div>
   </div>
 
   <!-- Sticky Header with Add Book Button and Filter -->
@@ -32,7 +37,7 @@
   <!-- Book List and Grid -->
   <section class="content-body">
     <div class="book-grid">
-      <div *ngFor="let book of filteredBooks" class="book-card">
+      <div *ngFor="let book of books" class="book-card">
         <img [title]="book.title" [src]="book.coverUrl" alt="{{ book.title }}" class="lazy-img">
         <h3 [title]="book.title">{{ book.title }}</h3>
         <p [title]="book.author">{{ book.author }}</p>
@@ -79,6 +84,7 @@
         </div>
       </div>
     </div>
+    <div *ngIf="isLoading" class="loader">Loading...</div>
   </section>
 
   <!-- Confirmation Modal -->

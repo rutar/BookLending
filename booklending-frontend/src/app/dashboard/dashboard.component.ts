@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, HostListener, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AddBookComponent } from '../add-book/add-book.component';
 import { NotificationService } from '../services/notification.service';
-import { BookDto, BookService, BookStatus } from "../services/book.service";
+import {BookDto, BookService, BookStatus, PagedResponse} from "../services/book.service";
 import { HttpClientModule } from '@angular/common/http';
 import { AuthService } from '../services/auth.service';
 import { ConfirmationModalComponent } from '../confirmation-modal/confirmation-modal.component';
@@ -20,19 +20,47 @@ export class DashboardComponent implements OnInit {
   isConfirmModalVisible = false;
   selectedBook: BookDto | null = null;
   books: BookDto[] = [];
-  filteredBooks: BookDto[] = [];
   statusFilters: { [key in BookStatus]: boolean } = {
-    [BookStatus.AVAILABLE]: false,
+    [BookStatus.AVAILABLE]: true,
     [BookStatus.RESERVED]: false,
     [BookStatus.LENT_OUT]: false,
     [BookStatus.BORROWED]: false,
     [BookStatus.RETURNED]: false
   };
+  currentPage = 0;
+  isLoading = false;
+  hasMoreBooks = true;
+  totalPages: number = 0;
 
-  constructor(private authService: AuthService, private notificationService: NotificationService, private booksService: BookService) {}
+  constructor(
+    private authService: AuthService,
+    private notificationService: NotificationService,
+    private booksService: BookService
+  ) {}
 
   ngOnInit(): void {
     this.loadBooks();
+  }
+
+/*
+  @HostListener('window:scroll', ['$event'])
+  onScroll(): void {
+    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 100 && !this.isLoading && this.hasMoreBooks) {
+      this.loadBooks();
+    }
+  }
+*/
+
+  @HostListener('window:scroll', ['$event'])
+  onScroll(event: Event): void {
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    const scrollHeight = document.documentElement.scrollHeight;
+    const clientHeight = document.documentElement.clientHeight;
+
+    // Trigger fetch when 75% of the page is scrolled
+    if (scrollTop + clientHeight >= scrollHeight * 0.75 && !this.isLoading && this.hasMoreBooks) {
+      this.loadBooks();
+    }
   }
 
   onAddBook() {
@@ -49,27 +77,37 @@ export class DashboardComponent implements OnInit {
   }
 
   loadBooks(): void {
-    this.booksService.getBooks().subscribe(data => {
-      this.books = data;
-      this.applyFilters();
-    });
-  }
+    if (this.isLoading) return;
 
-  applyFilters(): void {
-    const activeFilters = Object.entries(this.statusFilters)
+    this.isLoading = true;
+    const activeStatuses = Object.entries(this.statusFilters)
       .filter(([_, isActive]) => isActive)
       .map(([status, _]) => status as BookStatus);
 
-    if (activeFilters.length === 0) {
-      this.filteredBooks = this.books;
-    } else {
-      this.filteredBooks = this.books.filter(book => activeFilters.includes(book.status));
-    }
+    this.booksService.getBooks(this.currentPage, '', 'title', 'asc', activeStatuses).subscribe(
+      (response: PagedResponse<BookDto>) => {  // Correctly type response
+        this.books = [...this.books, ...response.content];  // Append new books to existing list
+        this.totalPages = response.totalPages;  // Update totalPages from response
+        this.hasMoreBooks = this.currentPage < this.totalPages - 1;  // Determine if more books are available
+        this.currentPage++;  // Increment current page for next request
+        this.isLoading = false;  // Stop loading indicator
+      },
+      (error) => {
+        console.error('Error fetching books:', error);
+        this.notificationService.openDialog('Failed to load books. Please try again later.', true);
+        this.isLoading = false;  // Ensure loading is stopped even on error
+      }
+    );
   }
 
+
   onFilterChange(): void {
-    this.applyFilters();
+    this.books = [];
+    this.currentPage = 0;
+    this.hasMoreBooks = true;
+    this.loadBooks();
   }
+
 
 
   onConfirmRemoveBook(book: BookDto): void {

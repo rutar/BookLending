@@ -2,6 +2,7 @@ package com.example.booklending.controller;
 
 import com.example.booklending.dto.BookDto;
 import com.example.booklending.exception.ConflictException;
+import com.example.booklending.model.PagedResponse;
 import com.example.booklending.service.BookService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -17,7 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -90,13 +90,14 @@ public class BookController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = BookDto.class)))
     })
     @GetMapping
-    public ResponseEntity<List<BookDto>> getAllBooks(
+    public ResponseEntity<PagedResponse<BookDto>> getAllBooks(
             @RequestParam(required = false) String searchQuery,
+            @RequestParam(defaultValue = "0") String page,
+            @RequestParam(defaultValue = "200") String size,
             @RequestParam(defaultValue = "title") String sortBy,
-            @RequestParam(defaultValue = "asc") String order) {
-
-        List<BookDto> books = bookService.getBooks(searchQuery, sortBy, order);
-        return new ResponseEntity<>(books, HttpStatus.OK);
+            @RequestParam(defaultValue = "asc") String order,
+            @RequestParam(defaultValue = "AVAILABLE") String statuses) {
+        return new ResponseEntity<>(bookService.getBooks(searchQuery, page, size, sortBy, order, statuses), HttpStatus.OK);
     }
 
     @Operation(summary = "Update a book", description = "Updates the details of an existing book.")
@@ -126,16 +127,14 @@ public class BookController {
             @ApiResponse(responseCode = "404", description = "Book not found")
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteBook(@Parameter(description = "ID of the book to delete") @PathVariable Long id,  @RequestParam String userName) {
+    public ResponseEntity<Void> deleteBook(@Parameter(description = "ID of the book to delete") @PathVariable Long id, @RequestParam String userName) {
 
         try {
             bookService.deleteBook(id, userName);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        catch (EntityNotFoundException e){
+        } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
