@@ -2,7 +2,7 @@ import {CommonModule, NgForOf} from "@angular/common";
 import {FormsModule} from "@angular/forms";
 import {Component, HostListener, OnInit} from '@angular/core';
 import {NotificationService} from '../services/notification.service';
-import {BookDto, BookService, BookStatus} from "../services/book.service";
+import {BookDto, BookService, BookStatus, PagedResponse} from "../services/book.service";
 import {AuthService} from '../services/auth.service';
 
 @Component({
@@ -23,17 +23,23 @@ export class HomeComponent implements OnInit {
   currentPage: number = 0;
   isLoading: boolean = false;
   hasMoreBooks: boolean = true;
+  totalPages: number = 0;
 
-  constructor(private authService: AuthService, private bookService: BookService, private notificationService: NotificationService) {}
+  constructor(private authService: AuthService, private bookService: BookService, private notificationService: NotificationService) {
+  }
 
   ngOnInit(): void {
     this.fetchBooks();
   }
 
-  // Infinite scrolling event listener
   @HostListener('window:scroll', ['$event'])
-  onScroll(): void {
-    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 100 && !this.isLoading && this.hasMoreBooks) {
+  onScroll(event: Event): void {
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    const scrollHeight = document.documentElement.scrollHeight;
+    const clientHeight = document.documentElement.clientHeight;
+
+    // Trigger fetch when 75% of the page is scrolled
+    if (scrollTop + clientHeight >= scrollHeight * 0.75 && !this.isLoading && this.hasMoreBooks) {
       this.fetchBooks();
     }
   }
@@ -43,17 +49,18 @@ export class HomeComponent implements OnInit {
     if (this.isLoading) return;
 
     this.isLoading = true;
-    this.bookService.getBooks(this.currentPage, this.searchQuery, 'title', 'asc').subscribe({
-      next: (response) => {
-        this.books = [...this.books, ...response.content];
-        this.hasMoreBooks = !response.last;
-        this.currentPage++;
-        this.isLoading = false;
+    this.bookService.getBooks(this.currentPage, this.searchQuery, 'title', 'asc', undefined).subscribe({
+      next: (response: PagedResponse<BookDto>) => {  // Correctly type response
+        this.books = [...this.books, ...response.content];  // Append new books to existing list
+        this.totalPages = response.totalPages;  // Update totalPages from response
+        this.hasMoreBooks = this.currentPage < this.totalPages - 1;  // Determine if more books are available
+        this.currentPage++;  // Increment current page for next request
+        this.isLoading = false;  // Stop loading indicator
       },
       error: (error) => {
         console.error('Error fetching books:', error);
         this.notificationService.openDialog('Failed to load books. Please try again later.', true);
-        this.isLoading = false;
+        this.isLoading = false;  // Ensure loading is stopped even on error
       }
     });
   }

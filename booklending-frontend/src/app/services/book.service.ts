@@ -47,6 +47,7 @@ export class BookService {
   private bookServiceBaseUrl = 'http://localhost:8080/api/books';  // URL for your backend API
   private actionServiceBaseUrl = 'http://localhost:8080/api/actions'; // URL for book actions
   private readonly maxPageSize = 200;
+
   constructor(private http: HttpClient, private authService: AuthService) {
   }
 
@@ -71,7 +72,7 @@ export class BookService {
       params = params.append('statuses', status);
     });
 
-    return this.http.get<PagedResponse<BookDto>>(this.bookServiceBaseUrl, { params });
+    return this.http.get<PagedResponse<BookDto>>(this.bookServiceBaseUrl, {params});
   }
 
 
@@ -104,7 +105,7 @@ export class BookService {
   }
 
   // Reserve a book
-  reserveBook(userName: string , bookId: number): Observable<BookDto> {
+  reserveBook(userName: string, bookId: number): Observable<BookDto> {
     const params = new HttpParams()
       .set('userName', userName)
       .set('bookId', bookId);
@@ -122,7 +123,7 @@ export class BookService {
   }
 
   // Mark a book as lent out by librarian
-  markAsLentout(userName: string , bookId: number): Observable<BookDto> {
+  markAsLentout(userName: string, bookId: number): Observable<BookDto> {
     const params = new HttpParams()
       .set('userName', userName)
       .set('bookId', bookId);
@@ -131,7 +132,7 @@ export class BookService {
   }
 
   // Mark a book as received
-  markAsReceived(userName: string , bookId: number): Observable<BookDto> {
+  markAsReceived(userName: string, bookId: number): Observable<BookDto> {
     const params = new HttpParams()
       .set('userName', userName)
       .set('bookId', bookId);

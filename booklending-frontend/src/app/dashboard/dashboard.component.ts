@@ -1,12 +1,12 @@
 import {Component, HostListener, OnInit} from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { AddBookComponent } from '../add-book/add-book.component';
-import { NotificationService } from '../services/notification.service';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {AddBookComponent} from '../add-book/add-book.component';
+import {NotificationService} from '../services/notification.service';
 import {BookDto, BookService, BookStatus, PagedResponse} from "../services/book.service";
-import { HttpClientModule } from '@angular/common/http';
-import { AuthService } from '../services/auth.service';
-import { ConfirmationModalComponent } from '../confirmation-modal/confirmation-modal.component';
+import {HttpClientModule} from '@angular/common/http';
+import {AuthService} from '../services/auth.service';
+import {ConfirmationModalComponent} from '../confirmation-modal/confirmation-modal.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -27,6 +27,16 @@ export class DashboardComponent implements OnInit {
     [BookStatus.BORROWED]: false,
     [BookStatus.RETURNED]: false
   };
+
+  // Define the ordered array of statuses
+  orderedStatuses: BookStatus[] = [
+    BookStatus.AVAILABLE,
+    BookStatus.RESERVED,
+    BookStatus.LENT_OUT,
+    BookStatus.BORROWED,
+    BookStatus.RETURNED
+  ];
+
   currentPage = 0;
   isLoading = false;
   hasMoreBooks = true;
@@ -36,20 +46,13 @@ export class DashboardComponent implements OnInit {
     private authService: AuthService,
     private notificationService: NotificationService,
     private booksService: BookService
-  ) {}
+  ) {
+  }
 
   ngOnInit(): void {
     this.loadBooks();
   }
 
-/*
-  @HostListener('window:scroll', ['$event'])
-  onScroll(): void {
-    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 100 && !this.isLoading && this.hasMoreBooks) {
-      this.loadBooks();
-    }
-  }
-*/
 
   @HostListener('window:scroll', ['$event'])
   onScroll(event: Event): void {
@@ -73,7 +76,6 @@ export class DashboardComponent implements OnInit {
 
   onBookAdded() {
     this.isAddBookModalVisible = false;
-    this.loadBooks();
   }
 
   loadBooks(): void {
@@ -100,15 +102,12 @@ export class DashboardComponent implements OnInit {
     );
   }
 
-
   onFilterChange(): void {
     this.books = [];
     this.currentPage = 0;
     this.hasMoreBooks = true;
     this.loadBooks();
   }
-
-
 
   onConfirmRemoveBook(book: BookDto): void {
     this.selectedBook = book;
@@ -132,6 +131,8 @@ export class DashboardComponent implements OnInit {
     this.booksService.reserveBook(this.authService.getUsername(), book.id).subscribe(updatedBook => {
       this.updateBookInList(updatedBook);
       this.notificationService.openDialog("Book reserved successfully.", false);
+      this.books = [];
+      this.currentPage = 0;
       this.loadBooks();
     });
   }
@@ -141,6 +142,8 @@ export class DashboardComponent implements OnInit {
     this.booksService.cancelReservation(this.authService.getUsername(), book.id).subscribe(updatedBook => {
       this.updateBookInList(updatedBook);
       this.notificationService.openDialog("Reservation canceled successfully.", false);
+      this.books = [];
+      this.currentPage = 0;
       this.loadBooks();
     });
   }
@@ -150,6 +153,8 @@ export class DashboardComponent implements OnInit {
     this.booksService.markAsReceived(this.authService.getUsername(), book.id).subscribe(updatedBook => {
       this.updateBookInList(updatedBook);
       this.notificationService.openDialog("Book received.", false);
+      this.books = [];
+      this.currentPage = 0;
       this.loadBooks();
     });
   }
@@ -159,6 +164,8 @@ export class DashboardComponent implements OnInit {
     this.booksService.markAsLentout(this.authService.getUsername(), book.id).subscribe(updatedBook => {
       this.updateBookInList(updatedBook);
       this.notificationService.openDialog("Book lent out.", false);
+      this.books = [];
+      this.currentPage = 0;
       this.loadBooks();
     });
   }
@@ -167,7 +174,9 @@ export class DashboardComponent implements OnInit {
   onMarkAsReturned(book: BookDto): void {
     this.booksService.markAsReturned(this.authService.getUsername(), book.id).subscribe(updatedBook => {
       this.updateBookInList(updatedBook);
-      this.notificationService.openDialog("Book returned to library.", false);
+      this.notificationService.openDialog("Book is returned to library.", false);
+      this.books = [];
+      this.currentPage = 0;
       this.loadBooks();
     });
   }
@@ -176,6 +185,8 @@ export class DashboardComponent implements OnInit {
     this.booksService.deleteBook(book.id).subscribe(() => {
       this.books = this.books.filter(b => b.id !== book.id);
       this.notificationService.openDialog("Book removed successfully.", false);
+      this.books = [];
+      this.currentPage = 0;
       this.loadBooks();
     });
   }

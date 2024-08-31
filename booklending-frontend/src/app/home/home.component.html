@@ -2,11 +2,16 @@
   <!-- Sticky Header with Search Bar -->
   <div class="header-container">
     <header class="content-header">
-      <h1>Books Lending</h1>
+      <h1>Books Borrowing</h1>
     </header>
     <div class="search-bar">
-      <input type="text" placeholder="Search for a book..." [(ngModel)]="searchQuery" (input)="onSearch()" />
+      <input type="text" placeholder="Search for a book..." [(ngModel)]="searchQuery" (input)="onSearch()"/>
     </div>
+  </div>
+
+  <!-- Loading Modal -->
+  <div *ngIf="isLoading" class="modal-overlay">
+    <div class="loader"></div>
   </div>
 
   <!-- Book List and Grid -->

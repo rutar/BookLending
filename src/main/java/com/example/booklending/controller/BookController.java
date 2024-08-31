@@ -96,7 +96,7 @@ public class BookController {
             @RequestParam(defaultValue = "200") String size,
             @RequestParam(defaultValue = "title") String sortBy,
             @RequestParam(defaultValue = "asc") String order,
-            @RequestParam(defaultValue = "AVAILABLE") String statuses) {
+            @RequestParam(defaultValue = "") String statuses) {
         return new ResponseEntity<>(bookService.getBooks(searchQuery, page, size, sortBy, order, statuses), HttpStatus.OK);
     }
 

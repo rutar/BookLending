@@ -3,7 +3,7 @@
   <div *ngIf="isAddBookModalVisible" class="modal-overlay" (click)="onCloseModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <button class="close-btn" (click)="onCloseModal()">×</button>
-      <app-add-book (bookAdded)="onAddBook()"></app-add-book>
+      <app-add-book (bookAdded)="onBookAdded()"></app-add-book>
     </div>
   </div>
 
@@ -22,11 +22,11 @@
       <div class="filter-container">
         <h3>Filter by Status:</h3>
         <div class="filter-checkboxes">
-          <label *ngFor="let status of BookStatus | keyvalue">
+          <label *ngFor="let status of orderedStatuses">
             <input type="checkbox"
-                   [(ngModel)]="statusFilters[status.value]"
+                   [(ngModel)]="statusFilters[status]"
                    (change)="onFilterChange()">
-            {{ status.value.replace('_', ' ') }}
+            {{ status.replace('_', ' ') }}
           </label>
         </div>
       </div>

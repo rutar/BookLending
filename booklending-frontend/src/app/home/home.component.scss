@@ -19,7 +19,7 @@ $shadow-color: rgba(0, 0, 0, 0.1);
     top: 0;
     left: 0;
     width: 98.4%;
-    background-color: white;  // Ensure the header has a background color
+    background-color: white; // Ensure the header has a background color
     z-index: 1000;
     padding: $padding;
     display: block;
@@ -38,7 +38,7 @@ $shadow-color: rgba(0, 0, 0, 0.1);
     }
 
     .search-bar {
-      margin-bottom: 0;  // Remove bottom margin to align with header
+      margin-bottom: 0; // Remove bottom margin to align with header
       display: flex;
       justify-content: left;
 
@@ -58,6 +58,45 @@ $shadow-color: rgba(0, 0, 0, 0.1);
         }
       }
     }
+  }
+
+  /* Modal overlay for loading */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Ensure it overlays other content */
+  }
+
+  /* Loader styles */
+  .loader {
+    border: 8px solid #f3f3f3; /* Light gray */
+    border-top: 8px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Ensure content body isn't interactive when loading */
+  .content-body.loading {
+    pointer-events: none; /* Disable interaction */
+    opacity: 0.6; /* Slightly dim the content */
   }
 
   // Add top margin to the content to avoid overlapping with the sticky header
