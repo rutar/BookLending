@@ -1,58 +1,64 @@
 <div class="home-container">
-  <!-- Search string -->
-  <div class="search-bar">
-    <input type="text" placeholder="Search for a book..." [(ngModel)]="searchQuery" (input)="onSearch()"/>
+  <!-- Sticky Header with Search Bar -->
+  <div class="header-container">
+    <header class="content-header">
+      <h1>Books Lending</h1>
+    </header>
+    <div class="search-bar">
+      <input type="text" placeholder="Search for a book..." [(ngModel)]="searchQuery" (input)="onSearch()" />
+    </div>
   </div>
-
 
   <!-- Book List and Grid -->
   <section class="content-body">
     <div class="book-grid">
       <div *ngFor="let book of books" class="book-card">
-        <img [src]="book.coverUrl" alt="{{ book.title }}" class="book-cover">
-        <h3>{{ book.title }}</h3>
-        <p>{{ book.author }}</p>
-        <p>
-          Status:
-          <span
-            [ngClass]="{
-              'available': book.status === BookStatus.AVAILABLE,
-              'lentout': book.status === BookStatus.LENT_OUT,
-              'reserved': book.status === BookStatus.RESERVED
-            }">
-            {{ book.status | titlecase }}
-          </span>
-        </p>
+        <img [title]="book.title" [src]="book.coverUrl" alt="{{ book.title }}" class="book-cover">
+        <h3 [title]="book.title">{{ book.title }}</h3>
+        <p [title]="book.author">{{ book.author }}</p>
+        <p>ISBN: {{ book.isbn }}</p>
+
 
         <div class="button-group">
+          <p>
+            Status:
+            <span
+              [ngClass]="{
+              'available': book.status === 'AVAILABLE',
+              'lentout': book.status === 'LENT_OUT',
+              'reserved': book.status === 'RESERVED',
+              'borrowed': book.status === 'BORROWED',
+              'returned': book.status === 'RETURNED'
+            }">
+            {{ book.status.replace('_', ' ') }}
+          </span>
+          </p>
           <button
-            *ngIf="book.status === BookStatus.AVAILABLE"
+            *ngIf="book.status === 'AVAILABLE'"
             (click)="reserveBook(book.id)"
             class="reserve-btn">
             RESERVE
           </button>
           <button
-            *ngIf="book.status === BookStatus.RESERVED"
+            *ngIf="book.status === 'RESERVED'"
             (click)="cancelReservation(book.id)"
             class="cancel-btn">
             Cancel Reservation
           </button>
           <button
-            *ngIf="book.status === BookStatus.LENT_OUT"
+            *ngIf="book.status === 'LENT_OUT'"
             (click)="markAsReceived(book.id)"
             class="received-btn">
             RECEIVED
           </button>
           <button
-            *ngIf="book.status === BookStatus.BORROWED"
+            *ngIf="book.status === 'BORROWED'"
             (click)="markAsReturned(book.id)"
             class="received-btn">
-            RETURNED
+            RETURN
           </button>
         </div>
       </div>
     </div>
   </section>
-
-
 </div>

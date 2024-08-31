@@ -1,0 +1,10 @@
+<div class="modal-overlay" (click)="onClose()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <h2>Are you sure you want to remove</h2>
+    <h3>"{{ bookTitle }}"?</h3>
+    <div class="button-group">
+      <button class="confirm-btn" (click)="onConfirm()">Yes</button>
+      <button class="cancel-btn" (click)="onClose()">No</button>
+    </div>
+  </div>
+</div>

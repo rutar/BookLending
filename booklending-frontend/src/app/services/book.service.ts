@@ -41,9 +41,15 @@ export class BookService {
   constructor(private http: HttpClient, private authService: AuthService) {
   }
 
-  // Fetch all books
-  getBooks(): Observable<BookDto[]> {
-    return this.http.get<BookDto[]>(this.bookServiceBaseUrl);
+
+  // Method to fetch books from the server with search and sorting
+  getBooks(searchQuery: string = '', sortBy: string = 'title', order: string = 'asc'): Observable<any[]> {
+    let params = new HttpParams()
+      .set('searchQuery', searchQuery)
+      .set('sortBy', sortBy)
+      .set('order', order);
+
+    return this.http.get<BookDto[]>(this.bookServiceBaseUrl, { params });
   }
 
   // Fetch a single book by ID
@@ -80,7 +86,7 @@ export class BookService {
       .set('userName', userName)
       .set('bookId', bookId);
 
-    return this.http.post<BookDto>(`${this.actionServiceBaseUrl}/reserve_book`, {}, {params});
+    return this.http.post<BookDto>(`${this.actionServiceBaseUrl}/reserve`, {}, {params});
   }
 
   // Cancel a reservation
@@ -92,22 +98,22 @@ export class BookService {
     return this.http.post<BookDto>(`${this.actionServiceBaseUrl}/cancel_reservation`, {}, {params});
   }
 
-  // Mark a book as received
-  markAsReceived(userName: string , bookId: number): Observable<BookDto> {
-    const params = new HttpParams()
-      .set('userName', userName)
-      .set('bookId', bookId);
-
-    return this.http.post<BookDto>(`${this.actionServiceBaseUrl}/mark_received`, {}, {params});
-  }
-
   // Mark a book as lent out by librarian
   markAsLentout(userName: string , bookId: number): Observable<BookDto> {
     const params = new HttpParams()
       .set('userName', userName)
       .set('bookId', bookId);
 
-    return this.http.post<BookDto>(`${this.actionServiceBaseUrl}/mark_lentout`, {}, {params});
+    return this.http.post<BookDto>(`${this.actionServiceBaseUrl}/lent_out`, {}, {params});
+  }
+
+  // Mark a book as received
+  markAsReceived(userName: string , bookId: number): Observable<BookDto> {
+    const params = new HttpParams()
+      .set('userName', userName)
+      .set('bookId', bookId);
+
+    return this.http.post<BookDto>(`${this.actionServiceBaseUrl}/received`, {}, {params});
   }
 
   // Mark a book as returned
@@ -116,6 +122,6 @@ export class BookService {
       .set('userName', userName)
       .set('bookId', bookId);
 
-    return this.http.post<BookDto>(`${this.actionServiceBaseUrl}/mark_returned`, {}, {params});
+    return this.http.post<BookDto>(`${this.actionServiceBaseUrl}/returned`, {}, {params});
   }
 }

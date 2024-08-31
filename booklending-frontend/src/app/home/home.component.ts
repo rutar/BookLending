@@ -23,30 +23,44 @@ export class HomeComponent {
   filteredBooks: BookDto[] = [];
 
   constructor(private authService: AuthService, private bookService: BookService, private notificationService: NotificationService) {
-    this.loadBooks();
+    this.fetchBooks();
   }
 
   ngOnInit(): void {
-    this.loadBooks();
+    this.fetchBooks();
   }
 
-  loadBooks() {
-    this.bookService.getBooks().subscribe(data => {
-      this.books = data;
-      this.filteredBooks = this.books;
-    });
-  }
-
-  onSearch() {
-    this.filteredBooks = this.books.filter(book =>
-      book.title.toLowerCase().includes(this.searchQuery.toLowerCase())
+  // Fetch books with server-side filtering and sorting
+  fetchBooks(): void {
+    this.bookService.getBooks(this.searchQuery, 'title', 'asc').subscribe(
+      (books) => {
+        this.books = books;
+      },
+      (error) => {
+        console.error('Error fetching books:', error);
+      }
     );
   }
 
+
+  // This method will be called whenever the search input changes
+  onSearch(): void {
+    this.fetchBooks();
+  }
+
   reserveBook(bookId: number) {
-    this.bookService.reserveBook(this.authService.getUsername(), bookId).subscribe(() => {
+    this.bookService.reserveBook(this.authService.getUsername(), bookId).subscribe({
+      next: () => {
       this.notificationService.openDialog("Book reserved successfully!", false);
-      this.loadBooks();
+      this.fetchBooks();
+    },
+      error: (err) => {
+        if (err.status === 404) {
+          this.notificationService.openDialog("Book not found.", true);
+        } else {
+          this.notificationService.openDialog("An error occurred. Please try again later.", true);
+        }
+      }
     });
   }
 
@@ -54,7 +68,7 @@ export class HomeComponent {
     this.bookService.cancelReservation(this.authService.getUsername(), bookId).subscribe({
       next: () => {
         this.notificationService.openDialog("Reservation cancelled successfully!", false);
-        this.loadBooks();
+        this.fetchBooks();
       },
       error: (err) => {
         if (err.status === 404) {
@@ -68,16 +82,35 @@ export class HomeComponent {
 
 
   markAsReceived(bookId: number) {
-    this.bookService.markAsReceived(this.authService.getUsername(), bookId).subscribe(() => {
+    this.bookService.markAsReceived(this.authService.getUsername(), bookId).subscribe({
+      next: () => {
       this.notificationService.openDialog("Book marked as received!", false);
-      this.loadBooks();
+      this.fetchBooks();
+      },
+      error: (err) => {
+        if (err.status === 404) {
+          this.notificationService.openDialog("This book is not lent out.", true);
+        } else {
+          this.notificationService.openDialog("An error occurred. Please try again later.", true);
+        }
+      }
     });
   }
 
+
   markAsReturned(bookId: number) {
-    this.bookService.markAsReturned(this.authService.getUsername(), bookId).subscribe(() => {
-      this.notificationService.openDialog("Book returned successfully!", false);
-      this.loadBooks();
+    this.bookService.markAsReturned(this.authService.getUsername(), bookId).subscribe({
+      next: () => {
+        this.notificationService.openDialog("Book returned successfully!", false);
+        this.fetchBooks();
+      },
+      error: (err) => {
+        if (err.status === 404) {
+          this.notificationService.openDialog("This book currently is not borrowed or returned by user", true);
+        } else {
+          this.notificationService.openDialog("An error occurred. Please try again later.", true);
+        }
+      }
     });
   }
 

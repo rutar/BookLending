@@ -90,8 +90,12 @@ public class BookController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = BookDto.class)))
     })
     @GetMapping
-    public ResponseEntity<List<BookDto>> getAllBooks() {
-        List<BookDto> books = bookService.getAllBooks();
+    public ResponseEntity<List<BookDto>> getAllBooks(
+            @RequestParam(required = false) String searchQuery,
+            @RequestParam(defaultValue = "title") String sortBy,
+            @RequestParam(defaultValue = "asc") String order) {
+
+        List<BookDto> books = bookService.getBooks(searchQuery, sortBy, order);
         return new ResponseEntity<>(books, HttpStatus.OK);
     }
 
@@ -135,24 +139,5 @@ public class BookController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-    }
-
-
-    @Operation(summary = "Search for books", description = "Searches for books based on title, author, or ISBN.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Books found",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = BookDto.class))),
-            @ApiResponse(responseCode = "400", description = "Invalid input"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
-    })
-    @GetMapping("/search")
-    public ResponseEntity<List<BookDto>> searchBooks(
-            @Parameter(description = "Search query to match against title, author, and ISBN") @RequestParam String query) {
-        try {
-            List<BookDto> books = bookService.searchBooks(query);
-            return new ResponseEntity<>(books, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
     }
 }

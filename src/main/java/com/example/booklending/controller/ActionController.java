@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +39,7 @@ public class ActionController {
             @ApiResponse(responseCode = "404", description = "Book or user not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PostMapping("/reserve_book")
+    @PostMapping("/reserve")
     public ResponseEntity<ActionDto> reserveBook(
             @Parameter(description = "User name making the reservation") @RequestParam String userName,
             @Parameter(description = "Book ID to be reserved") @RequestParam Long bookId) {
@@ -66,7 +67,28 @@ public class ActionController {
         try {
             ActionDto Action = actionService.cancelReservation(userName, bookId);
             return new ResponseEntity<>(Action, HttpStatus.OK);
-        } catch (RuntimeException e) {
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @Operation(summary = "Mark book as lent out", description = "Allows a library admin to mark a reserved book as lent out.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Book marked as lent out successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Action.class))),
+            @ApiResponse(responseCode = "404", description = "Reservation not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PostMapping("/lent_out")
+    public ResponseEntity<ActionDto> markAsLentOut(
+            @Parameter(description = "Book ID being lent out") @RequestParam Long bookId) {
+        try {
+            ActionDto Action = actionService.markAsLentOut(bookId);
+            return new ResponseEntity<>(Action, HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -80,35 +102,14 @@ public class ActionController {
             @ApiResponse(responseCode = "404", description = "Reservation not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PostMapping("/mark_received")
+    @PostMapping("/received")
     public ResponseEntity<ActionDto> markAsReceived(
             @Parameter(description = "User name receiving the book") @RequestParam String userName,
             @Parameter(description = "Book ID being received") @RequestParam Long bookId) {
         try {
             ActionDto Action = actionService.markAsReceived(userName, bookId);
             return new ResponseEntity<>(Action, HttpStatus.OK);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @Operation(summary = "Mark book as lent out", description = "Allows a library admin to mark a reserved book as lent out.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Book marked as lent out successfully",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Action.class))),
-            @ApiResponse(responseCode = "404", description = "Reservation not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
-    })
-    @PostMapping("/mark_lentout")
-    public ResponseEntity<ActionDto> markAsLentOut(
-            @Parameter(description = "Library admin name lending the book") @RequestParam String userName,
-            @Parameter(description = "Book ID being lent out") @RequestParam Long bookId) {
-        try {
-            ActionDto Action = actionService.markAsLentOut(userName, bookId);
-            return new ResponseEntity<>(Action, HttpStatus.OK);
-        } catch (RuntimeException e) {
+        } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -122,7 +123,7 @@ public class ActionController {
             @ApiResponse(responseCode = "404", description = "Book not found or not borrowed by user"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PostMapping("/mark_returned")
+    @PostMapping("/returned")
     public ResponseEntity<ActionDto> markAsReturned(
             @Parameter(description = "User name returning the book") @RequestParam String userName,
             @Parameter(description = "Book ID being returned") @RequestParam Long bookId) {
@@ -130,7 +131,7 @@ public class ActionController {
 
             ActionDto Action = actionService.markAsReturned(userName, bookId);
             return new ResponseEntity<>(Action, HttpStatus.OK);
-        } catch (RuntimeException e) {
+        } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

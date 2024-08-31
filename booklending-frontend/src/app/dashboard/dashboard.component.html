@@ -7,53 +7,62 @@
     </div>
   </div>
 
-  <!-- Sticky Header and Add Book Button -->
+  <!-- Sticky Header with Add Book Button and Filter -->
   <div class="header-container">
     <header class="content-header">
       <h1>Books Lending</h1>
     </header>
-    <button (click)="onAddBook()" class="add-btn">Add New Book</button>
+    <div class="header-actions">
+      <button (click)="onAddBook()" class="add-btn">Add New Book</button>
+      <div class="filter-container">
+        <h3>Filter by Status:</h3>
+        <div class="filter-checkboxes">
+          <label *ngFor="let status of BookStatus | keyvalue">
+            <input type="checkbox"
+                   [(ngModel)]="statusFilters[status.value]"
+                   (change)="onFilterChange()">
+            {{ status.value.replace('_', ' ') }}
+          </label>
+        </div>
+      </div>
+    </div>
   </div>
+
 
   <!-- Book List and Grid -->
   <section class="content-body">
     <div class="book-grid">
-      <div *ngFor="let book of books" class="book-card">
-        <img [src]="book.coverUrl" alt="{{ book.title }}" class="book-cover">
-        <h3>{{ book.title }}</h3>
-        <p>{{ book.author }}</p>
-        <p>
-          Status:
-          <span
-            [ngClass]="{
+      <div *ngFor="let book of filteredBooks" class="book-card">
+        <img [title]="book.title" [src]="book.coverUrl" alt="{{ book.title }}" class="lazy-img">
+        <h3 [title]="book.title">{{ book.title }}</h3>
+        <p [title]="book.author">{{ book.author }}</p>
+        <p>ISBN: {{ book.isbn }}</p>
+
+        <div class="button-group">
+          <p>
+            Status:
+            <span
+              [ngClass]="{
               'available': book.status === BookStatus.AVAILABLE,
               'reserved': book.status === BookStatus.RESERVED,
-              'lent_out': book.status === BookStatus.LENT_OUT,
+              'lentout': book.status === BookStatus.LENT_OUT,
               'borrowed': book.status === BookStatus.BORROWED,
               'returned': book.status === BookStatus.RETURNED
             }">
-            {{ book.status | titlecase }}
+            {{ book.status.replace('_', ' ') }}
           </span>
-        </p>
-
-        <div class="button-group">
+          </p>
           <button
             *ngIf="book.status === BookStatus.RESERVED"
             (click)="onCancelReservation(book)"
             class="cancel-btn">
             Cancel Reservation
           </button>
-<!--          <button
-            *ngIf="book.status === BookStatus.LENT_OUT || book.status === BookStatus.BORROWED"
-            (click)="onMarkAsReturned(book)"
-            class="return-btn">
-            Returned
-          </button>-->
           <button
             *ngIf="book.status === BookStatus.RESERVED "
             (click)="onMarkAsLentout(book)"
             class="lentout-btn">
-            Lent Out
+            Lend
           </button>
           <button
             *ngIf="book.status === BookStatus.RETURNED"
@@ -63,7 +72,7 @@
           </button>
           <button
             *ngIf="book.status === BookStatus.AVAILABLE"
-            (click)="onRemoveBook(book)"
+            (click)="onConfirmRemoveBook(book)"
             class="remove-btn">
             Remove Book
           </button>
@@ -72,7 +81,10 @@
     </div>
   </section>
 
-  <app-add-book *ngIf="isAddBookModalVisible" (closeModal)="isAddBookModalVisible = false"
-                (bookAdded)="onBookAdded()"></app-add-book>
-
+  <!-- Confirmation Modal -->
+  <app-confirmation-modal *ngIf="isConfirmModalVisible"
+                          [bookTitle]="selectedBook?.title ?? ''"
+                          (confirm)="onRemoveBookConfirmed()"
+                          (close)="onCloseConfirmModal()">
+  </app-confirmation-modal>
 </div>

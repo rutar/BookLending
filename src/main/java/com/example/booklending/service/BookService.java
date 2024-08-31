@@ -14,8 +14,10 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Sort;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -131,36 +133,32 @@ public class BookService {
         }
     }
 
-    public List<BookDto> getAllBooks() {
-        log.info("Fetching all books");
-        return bookRepository.findAll().stream()
+    public List<BookDto> getBooks(String searchQuery, String sortBy, String order) {
+        log.info("Fetching books with search query: {}, sorting by: {}, order: {}", searchQuery, sortBy, order);
+
+        // Create a sorting object based on the sortBy and order parameters
+        Sort sort = order.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+
+        // Create a specification for filtering
+        Specification<Book> spec = Specification.where(null);
+        if (searchQuery != null && !searchQuery.isEmpty()) {
+            String lowerCaseSearchQuery = "%" + searchQuery.toLowerCase() + "%";
+
+            spec = spec.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.or(
+                            criteriaBuilder.like(criteriaBuilder.lower(root.get("title")), lowerCaseSearchQuery),
+                            criteriaBuilder.like(criteriaBuilder.lower(root.get("isbn")), lowerCaseSearchQuery),
+                            criteriaBuilder.like(criteriaBuilder.lower(root.get("author")), lowerCaseSearchQuery)
+                    )
+            );
+        }
+
+        // Fetch the filtered and sorted list of books
+        return  bookRepository.findAll(spec, sort).stream()
                 .map(book -> {
                     log.debug("Mapping book entity to DTO for book ID: {}", book.getId());
                     return modelMapper.map(book, BookDto.class);
                 })
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Searches for books by title, author, or ISBN.
-     * <p>
-     * This method delegates to the {@link BookRepository#searchByTitleOrAuthorOrIsbn(String)}
-     * method to find books that match the search query in the title, author, or ISBN fields.
-     * The query is case-insensitive.
-     * </p>
-     *
-     * @param query the search query to match against the title, author, and ISBN fields.
-     *              The search is case-insensitive and matches any part of the fields.
-     * @return a list of {@link BookDto} objects that match the search criteria.
-     */
-    public List<BookDto> searchBooks(String query) {
-        if (query == null || query.trim().isEmpty()) {
-            return List.of();
-        }
-        String cleanedQuery = query.trim().toLowerCase();
-        List<Book> books = bookRepository.searchByTitleOrAuthorOrIsbn(cleanedQuery);
-        return books.stream()
-                .map(book -> modelMapper.map(book, BookDto.class))
                 .collect(Collectors.toList());
     }
 }

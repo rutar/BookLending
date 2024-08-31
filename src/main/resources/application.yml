@@ -51,3 +51,5 @@ springdoc:
 data:
   populate:
     enabled: true
+    local: true
+    limit: 888

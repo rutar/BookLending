@@ -33,6 +33,7 @@ public class ActionService {
     public ActionDto reserveBook(String userName, Long bookId) {
         User user = userRepository.findByUsername(userName).orElseThrow(() -> new RuntimeException("User not found"));
         Book book = bookRepository.findById(bookId).orElseThrow(() -> new RuntimeException("Book not found"));
+        Action reserveAction = new Action();
 
         if (user.getRole().getId() != 2) {
             throw new RuntimeException("User is not a borrower");
@@ -41,16 +42,15 @@ public class ActionService {
             throw new RuntimeException("Book is not available for reservation");
         }
 
-        Action action = new Action();
-        action.setBook(book);
-        action.setUser(user);
-        action.setAction(ActionType.RESERVE_BOOK);
-        action.setActionDate(LocalDateTime.now());
-        action.setDueDate(LocalDateTime.now().plusHours(24)); // reservation up to 24 hours
-
         book.setStatus(BookStatus.RESERVED);
 
-        Action savedAction = actionRepository.save(action);
+        reserveAction.setBook(book);
+        reserveAction.setUser(user);
+        reserveAction.setAction(ActionType.RESERVE_BOOK);
+        reserveAction.setActionDate(LocalDateTime.now());
+        reserveAction.setDueDate(LocalDateTime.now().plusHours(24)); // reservation up to 24 hours
+
+        Action savedAction = actionRepository.save(reserveAction);
         bookRepository.save(book);
 
         return convertToDto(savedAction);
@@ -58,23 +58,53 @@ public class ActionService {
 
     @Transactional
     public ActionDto cancelReservation(String userName, Long bookId) {
-        Book book = bookRepository.findById(bookId).orElseThrow(() -> new RuntimeException("Book not found"));
-        User user = userRepository.findByUsername(userName).orElseThrow(() -> new RuntimeException("User not found"));
+        Book book = bookRepository.findById(bookId).orElseThrow(() -> new EntityNotFoundException("Book not found"));
+        User user = userRepository.findByUsername(userName).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        Action cancelReservationAction = new Action();
 
-        Action reservation = actionRepository.findByBookIdAndAction(bookId, ActionType.RESERVE_BOOK)
-                .stream()
-                .filter(action -> action.getUser().getId().equals(user.getId()))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Reservation not found"));
-
-        reservation.setAction(ActionType.CANCEL_BOOK_RESERVATION);
+        if (!book.getStatus().equals(BookStatus.RESERVED)){
+            throw new RuntimeException("Book is not available for reservation");
+        }
 
         book.setStatus(BookStatus.AVAILABLE);
 
-        Action updatedAction = actionRepository.save(reservation);
+        cancelReservationAction.setAction(ActionType.CANCEL_BOOK_RESERVATION);
+        cancelReservationAction.setUser(user);
+        cancelReservationAction.setBook(book);
+
+        Action updatedAction = actionRepository.save(cancelReservationAction);
         bookRepository.save(book);
 
         return convertToDto(updatedAction);
+    }
+
+
+    @Transactional
+    public ActionDto markAsLentOut(Long bookId) {
+        Book book = bookRepository.findById(bookId).orElseThrow(() -> new EntityNotFoundException("Book not found"));
+        Action lentOutAction = new Action();
+
+        // find last reservation
+        Optional<Action> reservation = actionRepository.findByBookIdAndAction(bookId, ActionType.RESERVE_BOOK)
+                .stream()
+                .max(Comparator.comparing(Action::getActionDate));
+
+        if (reservation.isEmpty()) {
+            throw new EntityNotFoundException("Reservation not found");
+        }
+
+        book.setStatus(BookStatus.LENT_OUT);
+        bookRepository.save(book);
+
+        lentOutAction.setBook(book);
+        lentOutAction.setUser(reservation.get().getUser());
+        lentOutAction.setAction(ActionType.LENT_OUT_BOOK);
+        lentOutAction.setActionDate(LocalDateTime.now());
+        lentOutAction.setDueDate(LocalDateTime.now().plusWeeks(4)); // 4-week borrowing period
+
+        Action savedAction = actionRepository.save(lentOutAction);
+
+        return convertToDto(savedAction);
     }
 
     @Transactional
@@ -118,7 +148,7 @@ public class ActionService {
         if (user.getRole().getName().equals(USER_ROLE)) {
 
             if (!book.getStatus().equals(BookStatus.BORROWED)) {
-                new EntityNotFoundException("Book currently is not borrowed by user!");
+                throw new EntityNotFoundException("Book currently is not borrowed by user!");
             }
 
             Action returnAction = new Action();
@@ -136,7 +166,7 @@ public class ActionService {
         if (user.getRole().getName().equals(ADMIN_ROLE)) {
 
             if (!book.getStatus().equals(BookStatus.RETURNED)) {
-                new EntityNotFoundException("Book currently is not returned by user!");
+                throw new EntityNotFoundException("Book currently is not returned by user!");
             }
 
             Action returnAction = new Action();
@@ -150,7 +180,12 @@ public class ActionService {
             bookRepository.save(book);
         }
 
-        return convertToDto(savedAction);
+        if (savedAction != null) {
+            return convertToDto(savedAction);
+        }
+        else{
+            return null;
+        }
     }
 
     private ActionDto convertToDto(Action action) {
@@ -162,46 +197,6 @@ public class ActionService {
                 action.getActionDate(),
                 action.getDueDate()
         );
-    }
-
-    public Action convertToEntity(ActionDto actionDto) {
-        Action action = new Action();
-        action.setId(actionDto.getId());
-        action.setBook(bookRepository.findById(actionDto.getBookId()).orElseThrow());
-        action.setUser(userRepository.findById(actionDto.getUserId()).orElseThrow());
-        action.setAction(actionDto.getActionType());
-        action.setActionDate(actionDto.getActionDate());
-        action.setDueDate(actionDto.getDueDate());
-        return action;
-    }
-
-    @Transactional
-    public ActionDto markAsLentOut(String userName, Long bookId) {
-        Book book = bookRepository.findById(bookId).orElseThrow(() -> new EntityNotFoundException("Book not found"));
-        User user = userRepository.findByUsername(userName).orElseThrow(() -> new EntityNotFoundException("User not found"));
-        Action lentOutAction = new Action();
-
-        // find last reservation
-        Optional<Action> reservation = actionRepository.findByBookIdAndAction(bookId, ActionType.RESERVE_BOOK)
-                .stream()
-                .max(Comparator.comparing(Action::getActionDate));
-
-        if (!reservation.isPresent()) {
-            throw new EntityNotFoundException("Reservation not found");
-        }
-
-        book.setStatus(BookStatus.LENT_OUT);
-        bookRepository.save(book);
-
-        lentOutAction.setBook(book);
-        lentOutAction.setUser(reservation.get().getUser());
-        lentOutAction.setAction(ActionType.LENT_OUT_BOOK);
-        lentOutAction.setActionDate(LocalDateTime.now());
-        lentOutAction.setDueDate(LocalDateTime.now().plusWeeks(4)); // 4-week borrowing period
-
-        Action savedAction = actionRepository.save(lentOutAction);
-
-        return convertToDto(savedAction);
     }
 
 }
