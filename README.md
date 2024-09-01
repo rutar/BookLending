@@ -26,7 +26,7 @@ docker --version
 docker-compose --version
  ```
 
-Ensure gradle wrapper is available
+Ensure gradle wrapper is available:
  ```bash
 gradlew wrapper
  ```
