@@ -37,7 +37,7 @@ docker-compose up --build
  ```
 Three container images will be built: **backend**, **frontend** and **postgres**.
 
-Successful run of BookLending application will be shown il logs:
+Successful run of BookLending application will be shown in logs:
 
 <img src="img/Screenshot_1.png" alt="My local image" width="900">
 
@@ -138,7 +138,7 @@ password: **userpass**
 
 <img src="img/Screenshot_12.png" alt="My local image" width="900">
 
-Borrower view contains a sticky header with search panel, and books-card grid with
+Borrower view contains a sticky header with search panel, and book-cards grid with
 implemented infinite scrolling.
 
 Books are searchable by title, author and ISBN. Search is performed while typing symbols
