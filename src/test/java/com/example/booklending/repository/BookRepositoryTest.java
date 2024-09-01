@@ -2,26 +2,20 @@ package com.example.booklending.repository;
 
 import com.example.booklending.AbstractIntegrationTest;
 import com.example.booklending.model.Book;
+import com.example.booklending.model.BookStatus;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
-import com.example.booklending.model.BookStatus;
 
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Integration tests for the {@link BookRepository}.
- * <p>
- * This class tests the functionality of the {@link BookRepository#searchByTitleOrAuthorOrIsbn(String)} method
- * to ensure it correctly searches books by title, author, or ISBN.
- * </p>
- */
 @SpringBootTest
 @Tag("integration")
 @Transactional
@@ -31,81 +25,59 @@ public class BookRepositoryTest extends AbstractIntegrationTest {
     private BookRepository bookRepository;
 
     @Test
-    void testSaveAndFindBookByIsbn() {
-        // Create and save a book
+    void testFindByIsbn_whenBookExists() {
         Book book = new Book();
         book.setIsbn("1234567890");
         book.setTitle("Test Book");
         book.setAuthor("Test Author");
         book.setStatus(BookStatus.AVAILABLE);
-
         bookRepository.save(book);
 
-        // Find the book by ISBN
-        Optional<Book> foundBook = bookRepository.findByIsbn("1234567890");
+        Optional<Book> found = bookRepository.findByIsbn("1234567890");
 
-        assertTrue(foundBook.isPresent(), "Book should be found by ISBN");
-        assertEquals("Test Book", foundBook.get().getTitle(), "Book title should match");
-        assertEquals("Test Author", foundBook.get().getAuthor(), "Book author should match");
-        assertEquals(BookStatus.AVAILABLE, foundBook.get().getStatus(), "Book status should match");
+        assertTrue(found.isPresent());
+        assertEquals("Test Book", found.get().getTitle());
     }
 
     @Test
-    void testSearchByTitle() {
-        // Create and save books
-        Book book1 = new Book(null, "Effective Java", "Joshua Bloch", "978-0134685991", BookStatus.AVAILABLE, "cover_url");
-        Book book2 = new Book(null, "Clean Code", "Robert C. Martin", "978-0132350884", BookStatus.AVAILABLE, "cover_url");
-        bookRepository.save(book1);
-        bookRepository.save(book2);
+    void testFindByIsbn_whenBookDoesNotExist() {
+        Optional<Book> found = bookRepository.findByIsbn("9876543210");
 
-        // Search by title
-        List<Book> results = bookRepository.searchByTitleOrAuthorOrIsbn("Effective");
-
-        assertEquals(1, results.size(), "There should be exactly one book found by title");
-        assertEquals("Effective Java", results.get(0).getTitle(), "The title of the found book should match");
+        assertFalse(found.isPresent());
     }
 
     @Test
-    void testSearchByAuthor() {
-        // Create and save books
-        Book book1 = new Book(null, "Effective Java", "Joshua Bloch", "978-0134685991", BookStatus.AVAILABLE, "cover_url");
-        Book book2 = new Book(null, "Clean Code", "Robert C. Martin", "978-0132350884", BookStatus.AVAILABLE, "cover_url");
+    void testFindAll_withSpecificationAndSort() {
+        Book book1 = new Book();
+        book1.setTitle("ABC");
+        book1.setAuthor("Author 1");
+        book1.setIsbn("1234567891");
+        book1.setStatus(BookStatus.AVAILABLE);
         bookRepository.save(book1);
+
+        Book book2 = new Book();
+        book2.setTitle("XYZ");
+        book2.setAuthor("Author 2");
+        book2.setStatus(BookStatus.RESERVED);
+        book2.setIsbn("1234567892");
+
         bookRepository.save(book2);
 
-        // Search by author
-        List<Book> results = bookRepository.searchByTitleOrAuthorOrIsbn("Robert");
+        Book book3 = new Book();
+        book3.setTitle("DEF");
+        book3.setAuthor("Author 1");
+        book3.setIsbn("1234567893");
+        book3.setStatus(BookStatus.LENT_OUT);
+        bookRepository.save(book3);
 
-        assertEquals(1, results.size(), "There should be exactly one book found by author");
-        assertEquals("Clean Code", results.get(0).getTitle(), "The title of the found book should match");
-    }
+        Specification<Book> spec = (root, query, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get("author"), "Author 1");
+        Sort sort = Sort.by(Sort.Direction.DESC, "title");
 
-    @Test
-    void testSearchByIsbn() {
-        // Create and save books
-        Book book1 = new Book(null, "Effective Java", "Joshua Bloch", "978-0134685991", BookStatus.AVAILABLE, "cover_url");
-        Book book2 = new Book(null, "Clean Code", "Robert C. Martin", "978-0132350884", BookStatus.AVAILABLE, "cover_url");
-        bookRepository.save(book1);
-        bookRepository.save(book2);
+        List<Book> books = bookRepository.findAll(spec, sort);
 
-        // Search by ISBN
-        List<Book> results = bookRepository.searchByTitleOrAuthorOrIsbn("978-0134685991");
-
-        assertEquals(1, results.size(), "There should be exactly one book found by ISBN");
-        assertEquals("Effective Java", results.get(0).getTitle(), "The title of the found book should match");
-    }
-
-    @Test
-    void testSearchByNonexistentQuery() {
-        // Create and save books
-        Book book1 = new Book(null, "Effective Java", "Joshua Bloch", "978-0134685991", BookStatus.AVAILABLE, "cover_url");
-        Book book2 = new Book(null, "Clean Code", "Robert C. Martin", "978-0132350884", BookStatus.AVAILABLE, "cover_url");
-        bookRepository.save(book1);
-        bookRepository.save(book2);
-
-        // Search with a query that does not match any book
-        List<Book> results = bookRepository.searchByTitleOrAuthorOrIsbn("Nonexistent");
-
-        assertTrue(results.isEmpty(), "The search result should be empty for a nonexistent query");
+        assertEquals(2, books.size());
+        assertEquals("DEF", books.get(0).getTitle());
+        assertEquals("ABC", books.get(1).getTitle());
     }
 }

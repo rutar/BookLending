@@ -62,7 +62,7 @@ public class ActionService {
         User user = userRepository.findByUsername(userName).orElseThrow(() -> new EntityNotFoundException("User not found"));
         Action cancelReservationAction = new Action();
 
-        if (!book.getStatus().equals(BookStatus.RESERVED)){
+        if (!book.getStatus().equals(BookStatus.RESERVED)) {
             throw new RuntimeException("Book is not available for reservation");
         }
 
@@ -182,8 +182,7 @@ public class ActionService {
 
         if (savedAction != null) {
             return convertToDto(savedAction);
-        }
-        else{
+        } else {
             return null;
         }
     }

@@ -2,241 +2,154 @@ package com.example.booklending.service;
 
 import com.example.booklending.dto.BookDto;
 import com.example.booklending.exception.ConflictException;
+import com.example.booklending.model.Action;
 import com.example.booklending.model.Book;
-import com.example.booklending.model.BookStatus;
+import com.example.booklending.model.PagedResponse;
+import com.example.booklending.model.User;
+import com.example.booklending.repository.ActionRepository;
 import com.example.booklending.repository.BookRepository;
+import com.example.booklending.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-@Tag("unit")
 class BookServiceTest {
+
+    @Mock
+    private ModelMapper modelMapper;
 
     @Mock
     private BookRepository bookRepository;
 
     @Mock
-    private ModelMapper modelMapper;
+    private UserRepository userRepository;
+
+    @Mock
+    private ActionRepository actionRepository;
 
     @InjectMocks
     private BookService bookService;
 
-    private Book book;
-    private BookDto bookDto;
-
     @BeforeEach
     void setUp() {
-        book = new Book();
-        book.setId(1L);
-        book.setTitle("Test Book");
-        book.setIsbn("1234567890");
-        book.setStatus(BookStatus.AVAILABLE);
+        MockitoAnnotations.openMocks(this);
+    }
 
-        bookDto = new BookDto();
-        bookDto.setId(1L);
-        bookDto.setTitle("Test Book");
+    @Test
+    void createBook_Success() {
+        BookDto bookDto = new BookDto();
         bookDto.setIsbn("1234567890");
-        bookDto.setStatus(BookStatus.AVAILABLE);
+        Book book = new Book();
+        User user = new User();
+
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
+        when(bookRepository.findByIsbn(anyString())).thenReturn(Optional.empty());
+        when(modelMapper.map(any(BookDto.class), eq(Book.class))).thenReturn(book);
+        when(bookRepository.save(any(Book.class))).thenReturn(book);
+        when(modelMapper.map(any(Book.class), eq(BookDto.class))).thenReturn(bookDto);
+
+        Optional<BookDto> result = bookService.createBook(bookDto, "username");
+
+        assertTrue(result.isPresent());
+        verify(actionRepository, times(1)).save(any(Action.class));
     }
 
     @Test
-    void createBook_shouldReturnCreatedBookDto() {
-        when(modelMapper.map(bookDto, Book.class)).thenReturn(book);
-        when(bookRepository.save(book)).thenReturn(book);
+    void createBook_AlreadyExists() {
+        BookDto bookDto = new BookDto();
+        bookDto.setIsbn("1234567890");
+        User user = new User();
+
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
+        when(bookRepository.findByIsbn(anyString())).thenReturn(Optional.of(new Book()));
+
+        assertThrows(ConflictException.class, () -> bookService.createBook(bookDto, "username"));
+    }
+
+    @Test
+    void getBookById_Success() {
+        Long bookId = 1L;
+        Book book = new Book();
+        BookDto bookDto = new BookDto();
+
+        when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
         when(modelMapper.map(book, BookDto.class)).thenReturn(bookDto);
 
-        Optional<BookDto> result = bookService.createBook(bookDto);
-
-        assertEquals(Optional.of(bookDto), result);
-        verify(bookRepository).save(book);
-    }
-
-    @Test
-    void createBook_shouldThrowConflictExceptionWhenIsbnExists() {
-        when(bookRepository.findByIsbn(bookDto.getIsbn())).thenReturn(Optional.of(book));
-
-        assertThrows(ConflictException.class, () -> bookService.createBook(bookDto));
-        verify(bookRepository, never()).save(any(Book.class));
-    }
-
-    @Test
-    void createBook_shouldReturnEmptyOptionalOnGeneralException() {
-        when(bookRepository.save(any(Book.class))).thenThrow(new RuntimeException("Unexpected error"));
-        when(modelMapper.map(bookDto, Book.class)).thenReturn(book);
-
-        Optional<BookDto> result = bookService.createBook(bookDto);
-
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    void getBookById_shouldReturnBookDtoWhenBookExists() {
-        when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
-        when(modelMapper.map(book, BookDto.class)).thenReturn(bookDto);
-
-        Optional<BookDto> result = bookService.getBookById(1L);
+        Optional<BookDto> result = bookService.getBookById(bookId);
 
         assertTrue(result.isPresent());
         assertEquals(bookDto, result.get());
     }
 
     @Test
-    void getBookById_shouldReturnEmptyOptionalWhenBookDoesNotExist() {
-        when(bookRepository.findById(1L)).thenReturn(Optional.empty());
+    void updateBook_Success() {
+        Long bookId = 1L;
+        BookDto bookDto = new BookDto();
+        Book book = new Book();
 
-        Optional<BookDto> result = bookService.getBookById(1L);
-
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    void updateBook_shouldReturnUpdatedBookDto() {
-        when(bookRepository.save(any(Book.class))).thenReturn(book);
         when(modelMapper.map(bookDto, Book.class)).thenReturn(book);
+        when(bookRepository.save(any(Book.class))).thenReturn(book);
         when(modelMapper.map(book, BookDto.class)).thenReturn(bookDto);
 
+        Optional<BookDto> result = bookService.updateBook(bookId, bookDto);
 
-        Optional<BookDto> result = bookService.updateBook(1L, bookDto);
-
-        assertEquals(Optional.of(bookDto), result);
-        verify(bookRepository).save(book);
+        assertTrue(result.isPresent());
+        assertEquals(bookDto, result.get());
     }
 
     @Test
-    void updateBook_shouldReturnEmptyOptionalWhenUpdateFails() {
-        //   when(modelMapper.map(bookDto, Book.class)).thenReturn(book);
-        //   when(bookRepository.save(any(Book.class))).thenReturn(null);  // Simulating a failure in save
+    void deleteBook_Success() {
+        Long bookId = 1L;
+        User user = new User();
+        Book book = new Book();
 
-        Optional<BookDto> result = bookService.updateBook(1L, bookDto);
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
+        when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
 
-        assertTrue(result.isEmpty());
+        assertDoesNotThrow(() -> bookService.deleteBook(bookId, "username"));
+
+        verify(actionRepository, times(1)).save(any(Action.class));
+        verify(bookRepository, times(1)).delete(book);
     }
 
     @Test
-    void deleteBook_shouldCallDeleteWhenBookExists() {
-        when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
+    void deleteBook_NotFound() {
+        Long bookId = 1L;
+        User user = new User();
 
-        bookService.deleteBook(1L);
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
+        when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
 
-        verify(bookRepository).delete(book);
+        assertThrows(EntityNotFoundException.class, () -> bookService.deleteBook(bookId, "username"));
     }
 
     @Test
-    void deleteBook_shouldThrowEntityNotFoundExceptionWhenBookDoesNotExist() {
-        when(bookRepository.findById(1L)).thenReturn(Optional.empty());
+    void getBooks_Success() {
+        BookDto bookDto = new BookDto();
+        Page<Book> bookPage = new PageImpl<>(Collections.singletonList(new Book()));
 
-        assertThrows(EntityNotFoundException.class, () -> bookService.deleteBook(1L));
-    }
+        when(bookRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(bookPage);
+        when(modelMapper.map(any(Book.class), eq(BookDto.class))).thenReturn(bookDto);
 
-    @Test
-    void getAllBooks_shouldReturnListOfBookDtos() {
-        List<Book> books = new ArrayList<>();
-        books.add(book);
-        when(bookRepository.findAll()).thenReturn(books);
-        when(modelMapper.map(book, BookDto.class)).thenReturn(bookDto);
-
-        Iterable<BookDto> result = bookService.getAllBooks();
+        PagedResponse<BookDto> result = bookService.getBooks("query", "0", "10", "title", "asc", "AVAILABLE");
 
         assertNotNull(result);
-        assertTrue(result.iterator().hasNext());
-        assertEquals(bookDto, result.iterator().next());
-    }
-
-    @Test
-    void getBookByIsbn_shouldReturnBookDtoWhenBookExists() {
-        when(bookRepository.findByIsbn("1234567890")).thenReturn(Optional.of(book));
-        when(modelMapper.map(book, BookDto.class)).thenReturn(bookDto);
-
-        Optional<BookDto> result = bookService.getBookByIsbn("1234567890");
-
-        assertTrue(result.isPresent());
-        assertEquals(bookDto, result.get());
-    }
-
-    @Test
-    void getBookByIsbn_shouldReturnEmptyOptionalWhenBookDoesNotExist() {
-        when(bookRepository.findByIsbn("1234567890")).thenReturn(Optional.empty());
-
-        Optional<BookDto> result = bookService.getBookByIsbn("1234567890");
-
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    void testSearchBooksByTitle() {
-        String query = "Effective";
-        Book book = new Book(1L, "Effective Java", "Joshua Bloch", "978-0134685991", BookStatus.AVAILABLE, "cover_url");
-        BookDto bookDto = new BookDto(1L, "Effective Java", "Joshua Bloch", "978-0134685991", BookStatus.AVAILABLE, "cover_url");
-
-        when(bookRepository.searchByTitleOrAuthorOrIsbn(query.trim().toLowerCase())).thenReturn(List.of(book));
-        when(modelMapper.map(book, BookDto.class)).thenReturn(bookDto);
-
-        List<BookDto> result = bookService.searchBooks(query);
-
-        assertEquals(1, result.size());
-        assertEquals(bookDto, result.get(0));
-    }
-
-    @Test
-    void testSearchBooksByAuthor() {
-        String query = "Robert";
-        Book book = new Book(2L, "Clean Code", "Robert C. Martin", "978-0132350884", BookStatus.AVAILABLE, "cover_url");
-        BookDto bookDto = new BookDto(2L, "Clean Code", "Robert C. Martin", "978-0132350884", BookStatus.AVAILABLE, "cover_url");
-
-        when(bookRepository.searchByTitleOrAuthorOrIsbn(query.trim().toLowerCase())).thenReturn(List.of(book));
-        when(modelMapper.map(book, BookDto.class)).thenReturn(bookDto);
-
-        List<BookDto> result = bookService.searchBooks(query);
-
-        assertEquals(1, result.size());
-        assertEquals(bookDto, result.get(0));
-    }
-
-    @Test
-    void testSearchBooksByIsbn() {
-        String query = "978-0134685991";
-        Book book = new Book(1L, "Effective Java", "Joshua Bloch", "978-0134685991", BookStatus.AVAILABLE, "cover_url");
-        BookDto bookDto = new BookDto(1L, "Effective Java", "Joshua Bloch", "978-0134685991", BookStatus.AVAILABLE, "cover_url");
-
-        when(bookRepository.searchByTitleOrAuthorOrIsbn(query)).thenReturn(List.of(book));
-        when(modelMapper.map(book, BookDto.class)).thenReturn(bookDto);
-
-        List<BookDto> result = bookService.searchBooks(query);
-
-        assertEquals(1, result.size());
-        assertEquals(bookDto, result.get(0));
-    }
-
-    @Test
-    void testSearchBooksEmptyQuery() {
-        List<BookDto> result = bookService.searchBooks("");
-
-        assertEquals(0, result.size());
-    }
-
-    @Test
-    void testSearchBooksNoResults() {
-        String query = "Nonexistent";
-        when(bookRepository.searchByTitleOrAuthorOrIsbn(query.trim().toLowerCase())).thenReturn(Collections.emptyList());
-
-        List<BookDto> result = bookService.searchBooks(query);
-
-        assertEquals(0, result.size());
+        assertEquals(1, result.getContent().size());
+        assertEquals(bookDto, result.getContent().get(0));
     }
 }
