@@ -1,8 +1,8 @@
-import { Component, EventEmitter, HostListener, Output } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { BookDto, BookService } from '../services/book.service';
-import { NotificationService } from '../services/notification.service';
-import { CommonModule } from '@angular/common';
+import {Component, EventEmitter, HostListener, Output} from '@angular/core';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {BookDto, BookService} from '../services/book.service';
+import {NotificationService} from '../services/notification.service';
+import {CommonModule} from '@angular/common';
 
 @Component({
   selector: 'app-add-book',
@@ -79,4 +79,5 @@ export class AddBookComponent {
   get coverUrl() {
     return this.addBookForm.get('coverUrl');
   }
+
 }

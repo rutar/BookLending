@@ -50,17 +50,17 @@ export class HomeComponent implements OnInit {
 
     this.isLoading = true;
     this.bookService.getBooks(this.currentPage, this.searchQuery, 'title', 'asc', undefined).subscribe({
-      next: (response: PagedResponse<BookDto>) => {  // Correctly type response
-        this.books = [...this.books, ...response.content];  // Append new books to existing list
-        this.totalPages = response.totalPages;  // Update totalPages from response
-        this.hasMoreBooks = this.currentPage < this.totalPages - 1;  // Determine if more books are available
-        this.currentPage++;  // Increment current page for next request
-        this.isLoading = false;  // Stop loading indicator
+      next: (response: PagedResponse<BookDto>) => {
+        this.books = [...this.books, ...response.content];
+        this.totalPages = response.totalPages;
+        this.hasMoreBooks = this.currentPage < this.totalPages - 1;
+        this.currentPage++;
+        this.isLoading = false;
       },
       error: (error) => {
         console.error('Error fetching books:', error);
         this.notificationService.openDialog('Failed to load books. Please try again later.', true);
-        this.isLoading = false;  // Ensure loading is stopped even on error
+        this.isLoading = false;
       }
     });
   }

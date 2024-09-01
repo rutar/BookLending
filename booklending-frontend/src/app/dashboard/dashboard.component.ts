@@ -1,12 +1,13 @@
-import {Component, HostListener, OnInit} from '@angular/core';
+import {Component, HostListener, OnDestroy, OnInit} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {AddBookComponent} from '../add-book/add-book.component';
 import {NotificationService} from '../services/notification.service';
-import {BookDto, BookService, BookStatus, PagedResponse} from "../services/book.service";
+import {BookDto, BookService, BookStatus} from "../services/book.service";
 import {HttpClientModule} from '@angular/common/http';
 import {AuthService} from '../services/auth.service';
 import {ConfirmationModalComponent} from '../confirmation-modal/confirmation-modal.component';
+import {Subject, takeUntil} from "rxjs";
 
 @Component({
   selector: 'app-dashboard',
@@ -15,7 +16,8 @@ import {ConfirmationModalComponent} from '../confirmation-modal/confirmation-mod
   styleUrls: ['./dashboard.component.scss'],
   imports: [HttpClientModule, CommonModule, FormsModule, AddBookComponent, ConfirmationModalComponent]
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   isAddBookModalVisible = false;
   isConfirmModalVisible = false;
   selectedBook: BookDto | null = null;
@@ -86,20 +88,26 @@ export class DashboardComponent implements OnInit {
       .filter(([_, isActive]) => isActive)
       .map(([status, _]) => status as BookStatus);
 
-    this.booksService.getBooks(this.currentPage, '', 'title', 'asc', activeStatuses).subscribe(
-      (response: PagedResponse<BookDto>) => {  // Correctly type response
-        this.books = [...this.books, ...response.content];  // Append new books to existing list
-        this.totalPages = response.totalPages;  // Update totalPages from response
-        this.hasMoreBooks = this.currentPage < this.totalPages - 1;  // Determine if more books are available
-        this.currentPage++;  // Increment current page for next request
-        this.isLoading = false;  // Stop loading indicator
-      },
-      (error) => {
-        console.error('Error fetching books:', error);
-        this.notificationService.openDialog('Failed to load books. Please try again later.', true);
-        this.isLoading = false;  // Ensure loading is stopped even on error
-      }
-    );
+    this.booksService.getBooks(this.currentPage, '', 'title', 'asc', activeStatuses)
+      .subscribe({
+        next: (response) => {  // Correctly type response
+          this.books = [...this.books, ...response.content];  // Append new books to existing list
+          this.totalPages = response.totalPages;  // Update totalPages from response
+          this.hasMoreBooks = this.currentPage < this.totalPages - 1;  // Determine if more books are available
+          this.currentPage++;  // Increment current page for next request
+          this.isLoading = false;  // Stop loading indicator
+        },
+        error: (error) => {
+          console.error('Error fetching books:', error);
+          this.notificationService.openDialog('Failed to load books. Please try again later.', true);
+          this.isLoading = false;  // Ensure loading is stopped even on error
+        }
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   onFilterChange(): void {
@@ -126,26 +134,37 @@ export class DashboardComponent implements OnInit {
     this.selectedBook = null;
   }
 
-  // Reserve a book
+
   onReserveBook(book: BookDto): void {
-    this.booksService.reserveBook(this.authService.getUsername(), book.id).subscribe(updatedBook => {
-      this.updateBookInList(updatedBook);
-      this.notificationService.openDialog("Book reserved successfully.", false);
-      this.books = [];
-      this.currentPage = 0;
-      this.loadBooks();
-    });
+    this.booksService.reserveBook(this.authService.getUsername(), book.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (updatedBook) => {
+          this.notificationService.openDialog('Book reserved successfully.', false);
+          this.updateBookInList(updatedBook);
+          this.books = [];
+          this.currentPage = 0;
+          this.loadBooks();
+        },
+        error: (error) => {
+          this.notificationService.openDialog('Failed to reserve book. Please try again later.', true);
+          // Handle error
+        }
+      });
   }
+
 
   // Cancel a reservation
   onCancelReservation(book: BookDto): void {
-    this.booksService.cancelReservation(this.authService.getUsername(), book.id).subscribe(updatedBook => {
-      this.updateBookInList(updatedBook);
-      this.notificationService.openDialog("Reservation canceled successfully.", false);
-      this.books = [];
-      this.currentPage = 0;
-      this.loadBooks();
-    });
+    this.booksService.cancelReservation(this.authService.getUsername(), book.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(updatedBook => {
+        this.updateBookInList(updatedBook);
+        this.notificationService.openDialog("Reservation canceled successfully.", false);
+        this.books = [];
+        this.currentPage = 0;
+        this.loadBooks();
+      });
   }
 
   // Mark a book as received by user

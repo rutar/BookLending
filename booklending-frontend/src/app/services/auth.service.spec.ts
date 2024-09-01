@@ -76,7 +76,7 @@ describe('AuthService', () => {
   describe('getRoleFromToken', () => {
     it('should return the role ID from the token', () => {
       const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlSWQiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
-      const decodedPayload = {roleId: 12345};
+      const decodedPayload = {roleName: '12345'};
       spyOn(service as any, 'decodeJwtPayload').and.returnValue(decodedPayload);
       service.saveToken(token);
       expect(service.getRoleNameFromToken()).toBe('12345');
