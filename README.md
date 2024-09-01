@@ -1,10 +1,10 @@
 # Quick guide
 
-1. [Clone the repository]
-2. [Start BookLending application using docker compose]
-3. [Start using BookLending application]
-4. [Librarian role view]
-5. [Borrower role view]
+1. Clone the repository
+2. Start BookLending application using docker compose
+3. Start using BookLending application
+4. Librarian role view
+5. Borrower role view
 
 <a id="Clone the repository"></a>
 ### 1. Clone the repository
