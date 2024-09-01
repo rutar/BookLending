@@ -1,3 +1,160 @@
+# Quick guide
+
+1. [Clone the repository](#Clone the repository)
+2. [Start BookLending application using docker compose](#Start BookLending application using docker compose)
+3. [Start using BookLending application](#Start using BookLending application)
+4. [Librarian role view](#Librarian role view)
+5. [Borrower role view](#Borrower role view)
+
+<a id="Clone the repository"></a>
+### 1. Clone the repository
+
+
+Run the following command:
+
+ ```bash
+git clone https://github.com/rutar/BookLending.git
+cd BookLending
+ ```
+<a id="Start BookLending application using docker compose"></a>
+### 2. Start BookLending application using docker compose
+
+Ensure Docker and Docker-compose are installed:
+
+ ```bash
+docker --version
+docker-compose --version
+ ```
+Start the services defined in docker-compose.yml, ensuring to build images:
+ ```bash
+docker-compose up -build
+ ```
+Three container images will be built: **backend**, **frontend** and **postgres**.
+
+Successful run of BookLending application will be shown il logs:
+
+<img src="img/Screenshot_1.png" alt="My local image" width="900">
+
+<a id="Start using BookLending application"></a>
+### 3. Start using BookLending application
+
+Initially two roles and users are stored and possible to use:
+
+Librarian (Admin) and User.
+
+
+Navigate to localhost:
+
+<img src="img/Screenshot_2.png" alt="My local image" width="900">
+
+<a id="Librarian role view"></a>
+### 4. Librarian role view
+
+Enter librarian credentials, by default:
+
+
+username:**admin**
+
+password: **adminpass**
+
+
+<img src="img/Screenshot_3.png" alt="My local image" width="800">
+
+Librarian view consists of sticky header with 'Add New Book' button, book status filters
+and scrollable grid of book-cards with implemented infinite scrolling.
+
+Each book-card have basic book information (title, author, ISBN), book status field and
+action buttons, if actions available.
+
+Book statuses and actions flow are described in corresponded topic.
+
+Librarian can add a new book, by pressing "Add New Book" button:
+
+<img src="img/Screenshot_4.png" alt="My local image" width="500">
+
+
+All fields should be filled up, there is a validation process if  input data is incorrect.
+
+
+<img src="img/Screenshot_5.png" alt="My local image" width="500">
+
+
+After correct filling up the data, 'Add Book' button becomes active, and it is possible to save new book in database.
+
+
+<img src="img/Screenshot_6.png" alt="My local image" width="500">
+
+If saving was successful, success notification will be shown:
+
+<img src="img/Screenshot_7.png" alt="My local image" width="300">
+
+
+If no, then error message will be shown:
+
+
+
+<img src="img/Screenshot_8.png" alt="My local image" width="400">
+
+Status filtering bar helps user to filter books with specific statuses.
+For example to lend books out - it is needed to see what books are reserved:
+
+
+<img src="img/Screenshot_9.png" alt="My local image" width="900">
+
+Then librarian can cancel reservation or lend a book.
+
+If book is 'lent out' or 'borrowed' there are no any buttons,
+but onlu book statuses:
+
+<img src="img/Screenshot_10.png" alt="My local image" width="600">
+
+'Lent out' status means, that reserved book is lent out to borrower,
+but borrower should also accept book receiving. After that books becomes in borrowed state.
+With books in 'borrowed' state there is are no actions to librarian, just wait until book is returned.
+
+When user returns a book it becomes in 'returned' status, and librarian should accept
+that book is received by library:
+
+<img src="img/Screenshot_11.png" alt="My local image" width="600">
+
+After that book becomes in 'available' status.
+
+<a id="Borrower role view"></a>
+### 5. Borrower role view
+
+Navigate to localhost.
+Enter borrower credentials, by default:
+
+
+username:**user**
+
+password: **userpass**
+
+<img src="img/Screenshot_12.png" alt="My local image" width="900">
+
+Borrower view contains a sticky header with search panel, and books-card grid with
+implemented infinite scrolling.
+
+Books are searchable by title, author and ISBN. Search is performed while typing symbols
+to search panel:
+
+<img src="img/Screenshot_13.png" alt="My local image" width="900">
+
+Borrower can reserve a book and cancel reservation.
+If reserved book is lent out by librarian it will become into 'lent out' state
+and could be received by borrower:
+
+
+<img src="img/Screenshot_14.png" alt="My local image" width="400">
+
+After receiving book becomes to 'borrowed' state. After returning book back to library, borrower
+will mark book as returned. Librarian should accept this on his view.
+
+
+
+
+
+
 # Book Lending Application Documentation
 
 ## Table of Contents
@@ -20,6 +177,7 @@
 10. [Future Enhancements](#future-enhancements)
 11. [Flow description](#flow-descriprion)
 
+<a id="introduction"></a>
 ## 1. Introduction
 
 The Book Lending Application is a crowdsourced platform that allows users to borrow and lend books. It provides a user-friendly interface for managing book reservations, borrowing, and returning processes.
@@ -31,7 +189,7 @@ The Book Lending Application is a crowdsourced platform that allows users to bor
 - Marking books as received and returned
 - Adding and removing books for lending (for book owners)
 - Role-based access control (User and Admin roles)
-
+<a id="technical-stack"></a>
 ## 2. Technical Stack
 
 - **Backend:** Java 17+, Spring Boot
@@ -39,7 +197,7 @@ The Book Lending Application is a crowdsourced platform that allows users to bor
 - **Database:** PostgreSQL
 - **API Documentation:** Swagger (OpenAPI specification)
 - **Containerization:** Docker
-
+<a id="system-architecture"></a>
 ## 3. System Architecture
 
 The application follows a typical client-server architecture:
@@ -47,7 +205,7 @@ The application follows a typical client-server architecture:
 1. **Client (Frontend):** Angular-based single-page application (SPA)
 2. **Server (Backend):** Spring Boot REST API
 3. **Database:** PostgreSQL for data persistence
-
+<a id="backend"></a>
 ## 4. Backend
 
 ### API Endpoints
@@ -110,7 +268,7 @@ The main domain models include:
 
 The Swagger documentation will be automatically generated by Spring Boot if you've configured it correctly. To access it:
 Visit http://localhost:8080/swagger-ui.html after the backend service is running.
-
+<a id="frontend"></a>
 ## 5. Frontend
 
 The frontend is built with Angular and consists of several components and services.
@@ -164,7 +322,7 @@ export class LoginComponent {
 1. **AuthService:** Handles authentication-related operations
 2. **BookService:** Manages book-related API calls
 3. **NotificationService:** Provides a centralized way to display notifications
-
+<a id="database"></a>
 ## 6. Database
 
 The application uses PostgreSQL as its primary database. Key tables include:
@@ -172,7 +330,7 @@ The application uses PostgreSQL as its primary database. Key tables include:
 - `users`: Stores user information
 - `books`: Stores book information
 - `actions`: Stores lending actions
-
+<a id="authentication-and-authorization"></a>
 ## 7. Authentication and Authorization
 
 Initially provisioned two users:
@@ -189,20 +347,21 @@ The application uses JWT (JSON Web Tokens) for authentication. The process works
 2. Server validates credentials and generates a JWT
 3. Client stores the JWT and includes it in the Authorization header for subsequent requests
 4. Server validates the JWT for protected endpoints
+5. Passwords are encrypted
 
 Role-based access control is implemented to distinguish between regular users and administrators.
 
 
 
-
+<a id="testing"></a>
 ## 8. Testing
 
 The application includes unit tests and integration tests for both backend and frontend components. Tests are written using JUnit for the backend and Jasmine/Karma for the frontend.
-
+<a id="technical-stack"></a>
 ## 9. Deployment
 
 The application is containerized using Docker, allowing for easy deployment and scaling. A `docker-compose.yml` file is provided to orchestrate the deployment of the backend, frontend, and database services.
-
+<a id="future-enhancements"></a>
 ## 10. Future Enhancements
 
 Potential areas for future development include:
@@ -213,7 +372,7 @@ Potential areas for future development include:
 - Implementing a recommendation system based on user preferences and borrowing history
 
 This documentation provides an overview of the Book Lending Application. For more detailed information on specific components or processes, please refer to the inline code documentation and comments.
-
+<a id="flow-description"></a>
 ## 11. Flow description
 
 ### Flow chart diagram
