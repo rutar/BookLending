@@ -25,6 +25,12 @@ Ensure Docker and Docker-compose are installed:
 docker --version
 docker-compose --version
  ```
+
+Ensure gradle wrapper is available
+ ```bash
+gradlew wrapper
+ ```
+
 Start the services defined in docker-compose.yml, ensuring to build images:
  ```bash
 docker-compose up --build
