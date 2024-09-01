@@ -27,7 +27,7 @@ docker-compose --version
  ```
 Start the services defined in docker-compose.yml, ensuring to build images:
  ```bash
-docker-compose up -build
+docker-compose up --build
  ```
 Three container images will be built: **backend**, **frontend** and **postgres**.
 
