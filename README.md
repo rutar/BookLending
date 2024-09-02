@@ -110,7 +110,7 @@ For example to lend books out - it is needed to see what books are reserved:
 Then librarian can cancel reservation or lend a book.
 
 If book is 'lent out' or 'borrowed' there are no any buttons,
-but onlu book statuses:
+but only book statuses at the book card:
 
 <img src="img/Screenshot_10.png" alt="My local image" width="600">
 
