@@ -116,7 +116,7 @@ but only book statuses at the book card:
 
 'Lent out' status means, that reserved book is lent out to borrower,
 but borrower should also accept book receiving. After that books becomes in borrowed state.
-With books in 'borrowed' state there is are no actions to librarian, just wait until book is returned.
+With books in 'borrowed' state there are no actions to librarian, just wait until book is returned.
 
 When user returns a book it becomes in 'returned' status, and librarian should accept
 that book is received by library:
