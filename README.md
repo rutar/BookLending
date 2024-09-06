@@ -1,12 +1,12 @@
 # Quick guide
 
-1. Clone the repository
-2. Start BookLending application using docker compose
-3. Start using BookLending application
-4. Librarian role view
-5. Borrower role view
+1. [Clone the repository](#clone-the-repository)
+2. [Start BookLending application using docker compose](#start-booklending-application-using-docker-compose)
+3. [Start using BookLending application](#start-using-booklending-application)
+4. [Librarian role view](#librarian-role-view)
+5. [Borrower role view](#borrower-role-view)
 
-<a id="Clone the repository"></a>
+<a id="clone-the-repository"></a>
 ### 1. Clone the repository
 
 
@@ -16,7 +16,7 @@ Run the following command:
 git clone https://github.com/rutar/BookLending.git
 cd BookLending
  ```
-<a id="Start BookLending application using docker compose"></a>
+<a id="start-booklending-application-using-docker-compose"></a>
 ### 2. Start BookLending application using docker compose
 
 Ensure Docker and Docker-compose are installed:
@@ -41,7 +41,7 @@ Successful run of BookLending application will be shown in logs:
 
 <img src="img/Screenshot_1.png" alt="My local image" width="900">
 
-<a id="Start using BookLending application"></a>
+<a id="start-using-booklending-application"></a>
 ### 3. Start using BookLending application
 
 Initially two roles and users are stored and possible to use:
@@ -53,7 +53,7 @@ Navigate to localhost:
 
 <img src="img/Screenshot_2.png" alt="My local image" width="900">
 
-<a id="Librarian role view"></a>
+<a id="librarian-role-view"></a>
 ### 4. Librarian role view
 
 Enter librarian credentials, by default:
@@ -125,7 +125,7 @@ that book is received by library:
 
 After that book becomes in 'available' status.
 
-<a id="Borrower role view"></a>
+<a id="borrower-role-view"></a>
 ### 5. Borrower role view
 
 Navigate to localhost.
