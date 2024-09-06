@@ -3,7 +3,8 @@ server:
 
 
 jwt:
-  key: 6vOyI8689GpY/yTFeIOr0Rcg+ip6sTUb/3SemiWOYGc=
+  key: <put here encrypted strong key from relyable vault>
+  
   expiration: 86400000 # 24 hours in milliseconds (24 * 60 * 60 * 1000)
 
 spring:
